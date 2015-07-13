@@ -9,16 +9,6 @@ lazy val k_base = (project in file("kmodules/K-Base"))
   .settings(commonSettings: _*)
   .enablePlugins(PlayJava, PlayEbean)
 
-lazy val k_memcached = (project in file("kmodules/K-Memcached"))
-  .settings(commonSettings: _*)
-  .enablePlugins(PlayJava)
-  .dependsOn(k_base)
-
-lazy val k_redis = (project in file("kmodules/K-Redis"))
-  .settings(commonSettings: _*)
-  .enablePlugins(PlayJava)
-  .dependsOn(k_base)
-
 lazy val k_sms = (project in file("kmodules/K-SMS"))
   .settings(commonSettings: _*)
   .enablePlugins(PlayJava)
@@ -38,8 +28,6 @@ lazy val root = (project in file("."))
   .enablePlugins(PlayJava, PlayEbean)
   .aggregate(
     k_base,
-    k_memcached,
-    k_redis,
     k_sms,
     k_wechat,
     k_chinapnr)

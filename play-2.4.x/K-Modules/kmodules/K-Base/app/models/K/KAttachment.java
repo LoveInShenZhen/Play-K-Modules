@@ -9,9 +9,9 @@ package models.K;
  */
 
 import K.Aop.annotations.WithPersistLog;
+import com.avaje.ebean.Model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import play.data.format.Formats;
-import play.db.ebean.Model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,13 +27,13 @@ public class KAttachment extends Model {
     @Id
     public long id;
 
-    @Column(columnDefinition = "varchar(256) DEFAULT '' COMMENT '附件材料名称,即扫描件文件名称'")
+    @Column(columnDefinition = "VARCHAR(256) DEFAULT '' COMMENT '附件材料名称,即扫描件文件名称'")
     public String file_name;
 
-    @Column(columnDefinition = "varchar(4096) DEFAULT '' COMMENT '附件材料文件路径,即文件在文件服务器上的文件路径'")
+    @Column(columnDefinition = "VARCHAR(4096) DEFAULT '' COMMENT '附件材料文件路径,即文件在文件服务器上的文件路径'")
     public String file_path;
 
-    @Column(columnDefinition = "varchar(64) COMMENT '文件对应的 ContentType, 目前支持:image/JPEG image/PNG'")
+    @Column(columnDefinition = "VARCHAR(64) COMMENT '文件对应的 ContentType, 目前支持:image/JPEG image/PNG'")
     public String content_type;
 
     @Formats.DateTime(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -41,13 +41,13 @@ public class KAttachment extends Model {
     @Column(columnDefinition = "timestamp NOT NULL DEFAULT NOW()")
     public Date create_time;
 
-    @Column(columnDefinition = "varchar(4096) DEFAULT '' COMMENT '图片附件大缩略图路径,即文件在文件服务器上的文件路径'")
+    @Column(columnDefinition = "VARCHAR(4096) DEFAULT '' COMMENT '图片附件大缩略图路径,即文件在文件服务器上的文件路径'")
     public String scale_path_big;
 
-    @Column(columnDefinition = "varchar(4096) DEFAULT '' COMMENT '图片附件中缩略图路径,即文件在文件服务器上的文件路径'")
+    @Column(columnDefinition = "VARCHAR(4096) DEFAULT '' COMMENT '图片附件中缩略图路径,即文件在文件服务器上的文件路径'")
     public String scale_path_middle;
 
-    @Column(columnDefinition = "varchar(4096) DEFAULT '' COMMENT '图片附件小缩略图路径,即文件在文件服务器上的文件路径'")
+    @Column(columnDefinition = "VARCHAR(4096) DEFAULT '' COMMENT '图片附件小缩略图路径,即文件在文件服务器上的文件路径'")
     public String scale_path_small;
 
     @Column(columnDefinition = "TEXT COMMENT '备注信息'")
