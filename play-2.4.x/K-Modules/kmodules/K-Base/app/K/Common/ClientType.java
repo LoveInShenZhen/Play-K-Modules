@@ -1,4 +1,4 @@
-package K;
+package K.Common;
 
 import org.apache.commons.lang3.StringUtils;
 import play.Logger;

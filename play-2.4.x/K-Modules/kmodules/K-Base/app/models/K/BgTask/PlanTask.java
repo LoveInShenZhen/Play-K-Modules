@@ -4,9 +4,9 @@ package models.K.BgTask;
  * Created by kk on 14-1-21.
  */
 
-import K.DB;
+import K.Ebean.DB;
 import K.DataDict.TaskStatus;
-import K.Helper;
+import K.Common.Helper;
 import com.avaje.ebean.TxCallable;
 import com.avaje.ebean.TxRunnable;
 import com.fasterxml.jackson.annotation.JsonFormat;

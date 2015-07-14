@@ -1,4 +1,4 @@
-package K;
+package K.Common;
 
 /**
  * Created by kk on 14-1-14.
@@ -59,9 +59,6 @@ public class IdcardValidator {
 
     /**
      * 验证所有的身份证的合法性
-     *
-     * @param idcard
-     * @return
      */
     public boolean isValidatedAllIdcard(String idcard) {
         if (idcard.length() == 15) {
@@ -104,8 +101,6 @@ public class IdcardValidator {
      * 5.通过上面得知如果余数是2，就会在身份证的第18位数字上出现罗马数字的Ⅹ。如果余数是10，身份证的最后一位号码就是2。
      * </p>
      *
-     * @param idcard
-     * @return
      */
     public boolean isValidate18Idcard(String idcard) {
         // 非18位为假
@@ -150,8 +145,6 @@ public class IdcardValidator {
     /**
      * 验证15位身份证的合法性,该方法验证不准确，最好是将15转为18位后再判断，该类中已提供。
      *
-     * @param idcard
-     * @return
      */
     public boolean isValidate15Idcard(String idcard) {
         // 非15位为假
@@ -244,8 +237,6 @@ public class IdcardValidator {
     /**
      * 将15位的身份证转成18位身份证
      *
-     * @param idcard
-     * @return
      */
     public String convertIdcarBy15bit(String idcard) {
         String idcard17 = null;
@@ -299,8 +290,6 @@ public class IdcardValidator {
     /**
      * 15位和18位身份证号码的基本数字和位数验校
      *
-     * @param idcard
-     * @return
      */
     public boolean isIdcard(String idcard) {
         return idcard == null || "".equals(idcard) ? false : Pattern.matches(
@@ -310,8 +299,6 @@ public class IdcardValidator {
     /**
      * 15位身份证号码的基本数字和位数验校
      *
-     * @param idcard
-     * @return
      */
     public boolean is15Idcard(String idcard) {
         return idcard == null || "".equals(idcard) ? false : Pattern.matches(
@@ -322,8 +309,6 @@ public class IdcardValidator {
     /**
      * 18位身份证号码的基本数字和位数验校
      *
-     * @param idcard
-     * @return
      */
     public boolean is18Idcard(String idcard) {
         return Pattern
@@ -335,8 +320,6 @@ public class IdcardValidator {
     /**
      * 数字验证
      *
-     * @param str
-     * @return
      */
     public boolean isDigital(String str) {
         return str == null || "".equals(str) ? false : str.matches("^[0-9]*$");
@@ -345,8 +328,6 @@ public class IdcardValidator {
     /**
      * 将身份证的每位和对应位的加权因子相乘之后，再得到和值
      *
-     * @param bit
-     * @return
      */
     public int getPowerSum(int[] bit) {
 
@@ -369,9 +350,6 @@ public class IdcardValidator {
     /**
      * 将和值与11取模得到余数进行校验码判断
      *
-     * @param checkCode
-     * @param sum17
-     * @return 校验位
      */
     public String getCheckCodeBySum(int sum17) {
         String checkCode = null;
@@ -416,9 +394,6 @@ public class IdcardValidator {
     /**
      * 将字符数组转为整型数组
      *
-     * @param c
-     * @return
-     * @throws NumberFormatException
      */
     public int[] converCharToInt(char[] c) throws NumberFormatException {
         int[] a = new int[c.length];

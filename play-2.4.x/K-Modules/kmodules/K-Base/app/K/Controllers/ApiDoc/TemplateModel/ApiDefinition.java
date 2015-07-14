@@ -1,6 +1,6 @@
 package K.Controllers.ApiDoc.TemplateModel;
 
-import K.Helper;
+import K.Common.Helper;
 
 import java.util.ArrayList;
 import java.util.List;

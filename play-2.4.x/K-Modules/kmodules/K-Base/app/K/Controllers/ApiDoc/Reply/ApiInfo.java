@@ -1,8 +1,8 @@
 package K.Controllers.ApiDoc.Reply;
 
 
-import K.BizLogicException;
-import K.Helper;
+import K.Common.BizLogicException;
+import K.Common.Helper;
 import K.DataDict.RoleType;
 import K.Reply.ReplyBase;
 import K.Aop.annotations.CheckToken;

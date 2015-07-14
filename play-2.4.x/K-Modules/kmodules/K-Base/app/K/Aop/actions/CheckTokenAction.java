@@ -2,8 +2,8 @@ package K.Aop.actions;
 
 
 import K.Reply.ReplyBase;
-import K.Token;
-import K.TokenObject;
+import K.Common.Token;
+import K.Common.TokenObject;
 import K.Aop.annotations.CheckToken;
 import org.apache.commons.lang3.StringUtils;
 import play.libs.F;

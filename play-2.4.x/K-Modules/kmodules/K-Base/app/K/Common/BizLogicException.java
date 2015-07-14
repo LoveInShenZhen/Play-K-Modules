@@ -1,4 +1,4 @@
-package K;
+package K.Common;
 
 /**
  * Created by kk on 14-6-11.

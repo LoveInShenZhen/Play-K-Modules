@@ -6,8 +6,6 @@ libraryDependencies ++= Seq(
   javaWs
 )
 
-ivyScala := ivyScala.value map { _.copy(overrideScalaVersion = true) }
-
 libraryDependencies += "com.google.code.maven-play-plugin.org.playframework" % "jj-imaging" % "1.1"
 
 libraryDependencies += "com.google.code.maven-play-plugin.org.playframework" % "jj-simplecaptcha" % "1.1"

@@ -1,4 +1,4 @@
-package K;
+package K.Common;
 
 /**
  * Created with IntelliJ IDEA.
@@ -51,10 +51,10 @@ public class Images {
     /**
      * Resize an image
      *
-     * @param originalImage The image file
-     * @param to            The destination file
-     * @param w             The new width (or -1 mail_to proportionally resize)
-     * @param h             The new height (or -1 mail_to proportionally resize)
+     * originalImage The image file
+     * to            The destination file
+     * w             The new width (or -1 mail_to proportionally resize)
+     * h             The new height (or -1 mail_to proportionally resize)
      */
     public static void resize(File originalImage, File to, int w, int h) {
         resize(originalImage, to, w, h, false);
@@ -63,11 +63,11 @@ public class Images {
     /**
      * Resize an image
      *
-     * @param originalImage The image file
-     * @param to            The destination file
-     * @param w             The new width (or -1 mail_to proportionally resize) or the maxWidth if keepRatio is true
-     * @param h             The new height (or -1 mail_to proportionally resize) or the maxHeight if keepRatio is true
-     * @param keepRatio     : if true, resize will keep the original image ratio and use w and h as max dimensions
+     * originalImage The image file
+     * to            The destination file
+     * w             The new width (or -1 mail_to proportionally resize) or the maxWidth if keepRatio is true
+     * h             The new height (or -1 mail_to proportionally resize) or the maxHeight if keepRatio is true
+     * keepRatio     : if true, resize will keep the original image ratio and use w and h as max dimensions
      */
     public static void resize(File originalImage, File to, int w, int h, boolean keepRatio) {
         try {
@@ -135,12 +135,12 @@ public class Images {
     /**
      * Crop an image
      *
-     * @param originalImage The image file
-     * @param to            The destination file
-     * @param x1            The new x origin
-     * @param y1            The new y origin
-     * @param x2            The new x end
-     * @param y2            The new y end
+     * originalImage The image file
+     * to            The destination file
+     * x1            The new x origin
+     * y1            The new y origin
+     * x2            The new x end
+     * y2            The new y end
      */
     public static void crop(File originalImage, File to, int x1, int y1, int x2, int y2) {
         try {
@@ -179,9 +179,9 @@ public class Images {
      * Embeds an image watermark over a source image to produce
      * a watermarked one.
      *
-     * @param watermarkImageFile The image file used as the watermark.
-     * @param sourceImageFile    The source image file.
-     * @param destImageFile      The output image file.
+     * watermarkImageFile The image file used as the watermark.
+     * sourceImageFile    The source image file.
+     * destImageFile      The output image file.
      */
     public static void addImageWatermark(File watermarkImageFile,
                                          File sourceImageFile,

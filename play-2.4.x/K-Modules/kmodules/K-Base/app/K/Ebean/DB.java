@@ -1,4 +1,4 @@
-package K;
+package K.Ebean;
 
 /**
  * Created with IntelliJ IDEA.
@@ -9,6 +9,7 @@ package K;
  */
 
 import K.Aop.annotations.DBIndexed;
+import K.Common.BizLogicException;
 import com.avaje.ebean.*;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;

@@ -19,8 +19,11 @@ public class NotifyService extends ServiceBase {
 
     private String PlanTaskNotifyUrl;
 
-    public NotifyService() {
+    private Configuration configuration;
+
+    public NotifyService(Configuration configuration) {
         super(ServiceName);
+        this.configuration = configuration;
     }
 
     public static NotifyService getService() {
@@ -29,7 +32,7 @@ public class NotifyService extends ServiceBase {
     }
 
     private void LoadConf() {
-        PlanTaskNotifyUrl = Configuration.root().getString("cg.plan_task_notify_url",
+        PlanTaskNotifyUrl = this.configuration.getString("K.plan_task_notify_url",
                 "http://127.0.0.1:9000/sys/notify/NewPlanTask");
     }
 
@@ -46,7 +49,7 @@ public class NotifyService extends ServiceBase {
 
         Init();
         setRunning(true);
-        Logger.debug("NotifyService Started......");
+        Logger.debug("==>     NotifyService Started......");
     }
 
     @Override
@@ -64,7 +67,7 @@ public class NotifyService extends ServiceBase {
             return false;
         }
         setRunning(false);
-        Logger.debug("NotifyService Stopped......");
+        Logger.debug("==>     NotifyService Stopped......");
         return true;
     }
 

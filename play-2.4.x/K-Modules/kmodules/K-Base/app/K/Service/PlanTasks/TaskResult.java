@@ -1,6 +1,6 @@
 package K.Service.PlanTasks;
 
-import K.DB;
+import K.Ebean.DB;
 import com.avaje.ebean.TxIsolation;
 import com.avaje.ebean.TxRunnable;
 import com.avaje.ebean.TxScope;

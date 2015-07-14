@@ -1,6 +1,6 @@
 package K.EventBus;
 
-import K.Helper;
+import K.Common.Helper;
 import com.google.common.eventbus.SubscriberExceptionContext;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 import jodd.exception.ExceptionUtil;

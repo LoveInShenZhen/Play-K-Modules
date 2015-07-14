@@ -1,12 +1,12 @@
 package K.Controllers.ApiDoc;
 
 
-import K.BizLogicException;
-import K.Helper;
+import K.Common.BizLogicException;
+import K.Common.Helper;
 import K.Reply.BooleanReply;
 import K.Template.FileTemplateHelper;
-import K.Token;
-import K.TokenObject;
+import K.Common.Token;
+import K.Common.TokenObject;
 import K.Aop.annotations.CheckToken;
 import K.Aop.annotations.Comment;
 import K.Aop.annotations.JsonApi;

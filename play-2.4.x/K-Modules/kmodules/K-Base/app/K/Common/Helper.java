@@ -1,4 +1,4 @@
-package K;
+package K.Common;
 
 /**
  * Created with IntelliJ IDEA.

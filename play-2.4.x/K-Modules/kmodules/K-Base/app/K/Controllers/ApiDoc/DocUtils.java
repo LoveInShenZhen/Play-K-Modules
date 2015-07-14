@@ -1,7 +1,7 @@
 package K.Controllers.ApiDoc;
 
-import K.BizLogicException;
-import K.Helper;
+import K.Common.BizLogicException;
+import K.Common.Helper;
 import K.Aop.annotations.Comment;
 import K.Aop.annotations.JsonApi;
 import K.Controllers.ApiDoc.Reply.FieldInfo;

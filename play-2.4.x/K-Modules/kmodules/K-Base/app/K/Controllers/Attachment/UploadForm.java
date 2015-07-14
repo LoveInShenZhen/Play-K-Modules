@@ -1,9 +1,9 @@
 package K.Controllers.Attachment;
 
 
-import K.BizLogicException;
-import K.Images;
-import K.DB;
+import K.Common.BizLogicException;
+import K.Common.Images;
+import K.Ebean.DB;
 import K.Aop.annotations.Comment;
 import jodd.io.FileNameUtil;
 import jodd.io.FileUtil;

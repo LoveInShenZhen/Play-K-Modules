@@ -1,8 +1,8 @@
 package K.EventBus.Handlers.SyncHanlders;
 
-import K.BizLogicException;
+import K.Common.BizLogicException;
 import K.EventBus.Events.SampleEvent;
-import K.Helper;
+import K.Common.Helper;
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import play.Logger;

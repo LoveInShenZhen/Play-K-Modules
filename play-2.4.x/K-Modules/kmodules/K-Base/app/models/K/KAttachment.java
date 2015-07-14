@@ -38,7 +38,7 @@ public class KAttachment extends Model {
 
     @Formats.DateTime(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
-    @Column(columnDefinition = "timestamp NOT NULL DEFAULT NOW()")
+    @Column(columnDefinition = "TIMESTAMP NOT NULL DEFAULT NOW()")
     public Date create_time;
 
     @Column(columnDefinition = "VARCHAR(4096) DEFAULT '' COMMENT '图片附件大缩略图路径,即文件在文件服务器上的文件路径'")
