@@ -4,10 +4,12 @@ import K.Ebean.DB;
 import K.DataDict.TaskStatus;
 import K.Common.Helper;
 import K.Service.ServiceBase;
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.TxRunnable;
 import jodd.exception.ExceptionUtil;
 
 import models.K.BgTask.PlanTask;
+import play.Configuration;
 import play.Logger;
 
 
@@ -34,16 +36,22 @@ public class PlanTaskService extends ServiceBase {
 
     private int parallel_worker_thread_count = 4;
 
+    private Configuration configuration;
 
-    public PlanTaskService() {
+    public PlanTaskService(Configuration config) {
         super(ServiceName);
         seq_task_notifier = new Object();
         parallel_task_notifier = new Object();
         stop_now = false;
-        PlanTask.ResetTaskStatus();
+        configuration = config;
     }
 
     private void Init() {
+
+        PlanTask.ResetTaskStatus();
+
+        LoadCronTasks();
+
         parallel_task_queue = new ArrayBlockingQueue<>(parallel_worker_thread_count * 2);
         parallel_worker = Executors.newCachedThreadPool();
 
@@ -171,7 +179,7 @@ public class PlanTaskService extends ServiceBase {
                             @Override
                             public void run() {
                                 run_entity.run();
-                                DB.ReadWriteDB().delete(task);
+                                Ebean.delete(task);
                             }
                         });
                     } catch (Exception ex) {
@@ -184,7 +192,7 @@ public class PlanTaskService extends ServiceBase {
                             public void run() {
                                 task.task_status = TaskStatus.Exception.code;
                                 task.remarks = ex_msg;
-                                DB.ReadWriteDB().save(task);
+                                Ebean.save(task);
                             }
                         });
 
@@ -265,5 +273,9 @@ public class PlanTaskService extends ServiceBase {
         synchronized (parallel_task_notifier) {
             parallel_task_notifier.notifyAll();
         }
+    }
+
+    private void LoadCronTasks() {
+
     }
 }

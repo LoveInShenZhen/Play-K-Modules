@@ -1,10 +1,12 @@
 package K.Controllers.ApiDoc;
 
-import K.Common.BizLogicException;
-import K.Common.Helper;
 import K.Aop.annotations.Comment;
 import K.Aop.annotations.JsonApi;
+import K.Common.BizLogicException;
+import K.Common.Helper;
+import K.Controllers.ApiDoc.Reply.ApiInfo;
 import K.Controllers.ApiDoc.Reply.FieldInfo;
+import K.Template.ResourceTemplateHelper;
 import jodd.bean.BeanUtil;
 import jodd.util.ReflectUtil;
 
@@ -329,5 +331,43 @@ public class DocUtils {
         }
     }
 
+    public static String  GeneratApiMarkdown() {
+        try {
+            String md = ResourceTemplateHelper.Process(DefinedAPIs.class,
+                    "ApiDocTemplates/ApiDoc",
+                    DefinedAPIs.Instance().getApiDefinition());
+            return md;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
 
+    }
+
+    public static String GeneratApiSample(String api_url) {
+        try {
+            ApiInfo apiInfo = DefinedAPIs.Instance().getApiInfoByRoute(api_url);
+            if (apiInfo == null) {
+                return "<p>Can not find api by url</p>";
+            }
+            String html = ResourceTemplateHelper.Process(DefinedAPIs.class,
+                    "ApiDocTemplates/ApiSample.html",
+                    apiInfo);
+            return html;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public static String GeneratApiTestPage() {
+        try {
+
+            String html = ResourceTemplateHelper.Process(DefinedAPIs.class,
+                    "ApiDocTemplates/ApiTest.html",
+                    DefinedAPIs.Instance().getApiDefinition());
+            return html;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+
+    }
 }

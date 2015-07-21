@@ -1,5 +1,6 @@
 package K.Init;
 
+import K.Ebean.DB;
 import K.EventBus.EventBusService;
 import K.Service.NotifyService;
 import K.Service.PlanTasks.PlanTaskService;
@@ -9,6 +10,7 @@ import com.google.inject.Singleton;
 import play.Configuration;
 import play.Environment;
 import play.Logger;
+import play.db.ebean.EbeanConfig;
 import play.inject.ApplicationLifecycle;
 import play.libs.F;
 
@@ -48,7 +50,7 @@ public class InitKBaseImp implements InitKBase {
         Logger.debug("==> InitKBase.OnStart() ...");
 
         if (RunPlanTaskService()) {
-            PlanTaskService service = new PlanTaskService();
+            PlanTaskService service = new PlanTaskService(this.configuration);
             ServiceMgr.Instance.RegService(service);
 
             AddServiceTasks();

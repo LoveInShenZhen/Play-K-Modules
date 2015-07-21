@@ -1,5 +1,9 @@
 name := """K-Base"""
 
+javacOptions ++= Seq("-parameters", "-Xlint:unchecked", "-Xlint:deprecation", "-encoding", "UTF8")
+
+scalacOptions ++= Seq("-encoding", "UTF8")
+
 libraryDependencies ++= Seq(
   javaJdbc,
   cache,

@@ -1,21 +1,19 @@
 package K.Controllers.ApiDoc.Reply;
 
 
-import K.Common.BizLogicException;
-import K.Common.Helper;
-import K.DataDict.RoleType;
-import K.Reply.ReplyBase;
 import K.Aop.annotations.CheckToken;
 import K.Aop.annotations.Comment;
-import K.Aop.annotations.PostDataType;
-import com.google.common.primitives.Primitives;
+import K.Aop.annotations.JsonApi;
+import K.Common.BizLogicException;
+import K.Common.Helper;
 import K.Controllers.ApiDoc.DocUtils;
-
 import K.Controllers.Attachment.UploadForm;
 import K.Controllers.JsonpController;
+import K.DataDict.RoleType;
+import K.Reply.ReplyBase;
+import com.google.common.primitives.Primitives;
 import jodd.util.ReflectUtil;
 import play.Logger;
-
 
 import java.lang.reflect.*;
 import java.util.ArrayList;
@@ -55,6 +53,10 @@ public class ApiInfo {
 
     @Comment("API 所有参数的描述")
     public List<FieldInfo> params;
+
+    public static final String PostJson = "POST JSON";
+    public static final String PostForm = "POST FORM";
+    public static final String Get = "GET";
 
     public ApiInfo(String url,
                    String http_method,
@@ -99,9 +101,9 @@ public class ApiInfo {
         }
 
         if (!this.http_method.equalsIgnoreCase("GET")) {
-            PostDataType postDataType_anno = method.getAnnotation(PostDataType.class);
-            if (postDataType_anno != null) {
-                this.post_data_class = postDataType_anno.class_name();
+            JsonApi api_anno = method.getAnnotation(JsonApi.class);
+            if (api_anno.PostDataClass() != null) {
+                this.post_data_class = api_anno.PostDataClass().getName();
                 Object post_data_sample_obj = Helper.LoadClass(this.post_data_class).newInstance();
                 DocUtils.SetupSampleDataForBasicTypeFields(post_data_sample_obj);
                 this.post_data_sample = Helper.ToJsonStringPretty(post_data_sample_obj);

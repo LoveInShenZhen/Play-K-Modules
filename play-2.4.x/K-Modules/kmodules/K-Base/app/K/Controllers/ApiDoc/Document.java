@@ -1,23 +1,18 @@
 package K.Controllers.ApiDoc;
 
 
-import K.Common.BizLogicException;
-import K.Common.Helper;
-import K.Reply.BooleanReply;
-import K.Template.FileTemplateHelper;
-import K.Common.Token;
-import K.Common.TokenObject;
 import K.Aop.annotations.CheckToken;
 import K.Aop.annotations.Comment;
 import K.Aop.annotations.JsonApi;
+import K.Common.BizLogicException;
+import K.Common.Helper;
+import K.Common.Token;
+import K.Common.TokenObject;
 import K.Controllers.ApiDoc.Reply.ApiInfo;
 import K.Controllers.JsonpController;
-import freemarker.template.TemplateException;
-
+import K.Reply.BooleanReply;
 import play.mvc.Result;
 
-
-import java.io.IOException;
 import java.lang.reflect.Method;
 
 /**
@@ -25,32 +20,22 @@ import java.lang.reflect.Method;
  */
 public class Document extends JsonpController {
 
-    public Result GeneratApiMarkdown()
-            throws IllegalAccessException, ClassNotFoundException, InstantiationException, IOException, TemplateException {
-        DefinedAPIs apIs = DefinedAPIs.Instance();
-        String md = FileTemplateHelper.Process("/ApiDoc", apIs.getApiDefinition());
-        return ok(md);
+    public Result GeneratApiMarkdown() {
+        return ok(DocUtils.GeneratApiMarkdown()).as("text/plain");
     }
 
-    public Result GeneratApiSample(String api_url) throws IllegalAccessException, ClassNotFoundException, InstantiationException, IOException, TemplateException {
-        DefinedAPIs apIs = DefinedAPIs.Instance();
-        ApiInfo apiInfo = apIs.getApiInfoByRoute(api_url);
-        if (apiInfo == null) {
-            return ok("<p>Can not find api by url</p>");
-        }
-        String html = FileTemplateHelper.Process("/ApiSample.html", apiInfo);
-        return ok(html).as("text/html");
+    public Result GeneratApiSample(String api_url) {
+        return ok(DocUtils.GeneratApiSample(api_url)).as("text/html");
     }
 
-    public Result GeneratApiTestPage() throws IOException, TemplateException {
-        DefinedAPIs apIs = DefinedAPIs.Instance();
-        String html = FileTemplateHelper.Process("/ApiTest.html", apIs.getApiDefinition());
-        return ok(html).as("text/html");
+    public Result GeneratApiTestPage() {
+        return ok(DocUtils.GeneratApiTestPage()).as("text/html");
     }
+
 
     @Comment("根据 token 检查当前 api 是否有授权")
     @CheckToken
-    @JsonApi
+
     public Result ApiAuthorization(@Comment("用户登录后的token") String token,
                                           @Comment("需要检测的 API 的 url") String api_url) throws ClassNotFoundException {
         DefinedAPIs apIs = DefinedAPIs.Instance();

@@ -7,6 +7,7 @@ import K.Common.Helper;
 import K.Ebean.DB;
 import K.Reply.ReplyBase;
 import K.Aop.annotations.JsonApi;
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.TxCallable;
 import com.avaje.ebean.TxIsolation;
 import com.avaje.ebean.TxScope;
@@ -127,7 +128,7 @@ public class JsonApiAction extends Action<JsonApi> {
                     }
                 }
             };
-            F.Promise<Result> resultPromise = DB.ReadWriteDB().execute(txScope, txCallable);
+            F.Promise<Result> resultPromise = Ebean.execute(txScope, txCallable);
             return resultPromise;
 
         } catch (BizLogicException ex) {

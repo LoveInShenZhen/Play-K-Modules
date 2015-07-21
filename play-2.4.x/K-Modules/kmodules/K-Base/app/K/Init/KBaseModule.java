@@ -1,9 +1,11 @@
 package K.Init;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Singleton;
 import play.Configuration;
 import play.Environment;
+import play.api.inject.Binding;
+import play.api.inject.Module;
+import scala.collection.Seq;
 
 
 /**
@@ -11,7 +13,7 @@ import play.Environment;
  */
 
 @Singleton
-public class KBaseModule extends AbstractModule {
+public class KBaseModule extends Module {
 
     Environment environment;
 
@@ -23,19 +25,16 @@ public class KBaseModule extends AbstractModule {
     }
 
     @Override
-    protected void configure() {
-        bind(InitKBase.class)
-                .to(InitKBaseImp.class)
-                .asEagerSingleton();
+    public Seq<Binding<?>> bindings(play.api.Environment environment, play.api.Configuration configuration) {
+
+        return seq(bind(InitKBase.class).to(InitKBaseImp.class).eagerly());
     }
 
 //    @Override
-//    public Seq<Binding<?>> bindings(Environment environment, Configuration configuration) {
-//        return seq(bind(InitKBase.class)
-//                        .to(InitKBaseImp.class)
-//                        .eagerly(),
-//                bind(EventBusService.class)
-//                .to(EventServiceImp.class)
-//        );
+//    protected void configure() {
+//        bind(InitKBase.class)
+//                .to(InitKBaseImp.class)
+//                .asEagerSingleton();
 //    }
+
 }

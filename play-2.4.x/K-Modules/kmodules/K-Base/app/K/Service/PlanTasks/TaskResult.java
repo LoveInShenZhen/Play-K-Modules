@@ -1,6 +1,7 @@
 package K.Service.PlanTasks;
 
 import K.Ebean.DB;
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.TxIsolation;
 import com.avaje.ebean.TxRunnable;
 import com.avaje.ebean.TxScope;
@@ -20,7 +21,7 @@ public class TaskResult {
     public static void RunTaskInTransaction(final Runnable task, final TaskResult result) {
         try {
             TxScope txScope = TxScope.requiresNew().setIsolation(TxIsolation.READ_COMMITED);
-            DB.ReadWriteDB().execute(txScope, new TxRunnable() {
+            Ebean.execute(txScope, new TxRunnable() {
                 @Override
                 public void run() {
                     task.run();

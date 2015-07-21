@@ -4,6 +4,7 @@ package K.Common;
  * Created by kk on 14-1-14.
  */
 
+import jodd.util.MathUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.text.ParseException;
@@ -402,6 +403,32 @@ public class IdcardValidator {
             a[k++] = Integer.parseInt(String.valueOf(temp));
         }
         return a;
+    }
+
+    public boolean isMale(String idcard) {
+        int gender_code = GenderCode(idcard);
+        return MathUtil.isOdd(gender_code);
+    }
+
+    public boolean isFemale(String idcard) {
+        int gender_code = GenderCode(idcard);
+        return MathUtil.isEven(gender_code);
+    }
+
+    private int GenderCode(String idcard) {
+        if (!isValidatedAllIdcard(idcard)) {
+            throw new BizLogicException("不是合法的身份证号码");
+        }
+
+        String code;
+        if (idcard.length() == 15) {
+            // 15位身份证号码 第15位代表性别，奇数为男，偶数为女
+            code = idcard.substring(14, 15);
+        } else {
+            // 18位身份证号码 第17位代表性别，奇数为男，偶数为女。
+            code = idcard.substring(16, 17);
+        }
+        return Integer.parseInt(code);
     }
 
     public static void main(String[] args) throws Exception {

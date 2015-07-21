@@ -15,4 +15,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonApi {
     boolean Transactional() default true;
+
+    Class ReplyClass();
+
+    String ApiMethodType() default "GET";
+
+    Class PostDataClass() default Object.class;
 }

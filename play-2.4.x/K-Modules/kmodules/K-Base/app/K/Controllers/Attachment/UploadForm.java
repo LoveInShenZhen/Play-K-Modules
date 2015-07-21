@@ -166,7 +166,7 @@ public class UploadForm {
 
         FileUtil.delete(src_fpath);
 
-        DB.ReadWriteDB().save(ac);
+        ac.save();
         return ac.id;
     }
 
@@ -223,8 +223,7 @@ public class UploadForm {
 
         FileUtil.move(src_fpath, dest_fpath);
 
-        DB.ReadWriteDB().save(ac);
-
+        ac.save();
         return ac.id;
     }
 

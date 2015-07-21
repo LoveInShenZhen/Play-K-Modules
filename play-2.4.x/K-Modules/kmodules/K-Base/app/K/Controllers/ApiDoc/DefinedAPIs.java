@@ -1,13 +1,14 @@
 package K.Controllers.ApiDoc;
 
-import K.Reply.BooleanReply;
+import K.Aop.annotations.JsonApi;
+import K.Common.BizLogicException;
+import K.Common.Helper;
 import K.Controllers.ApiDoc.Reply.ApiInfo;
+import K.Controllers.ApiDoc.Reply.RouteInfo;
 import K.Controllers.ApiDoc.TemplateModel.ApiDefinition;
 import K.Controllers.ApiDoc.TemplateModel.ApiGroup;
-
 import jodd.exception.ExceptionUtil;
 import play.Logger;
-
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -30,9 +31,15 @@ public class DefinedAPIs {
 
     private ApiDefinition apiDefinition;
 
-    public DefinedAPIs() throws IllegalAccessException, InstantiationException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
+    private DefinedAPIs()
+            throws IllegalAccessException,
+            InstantiationException,
+            ClassNotFoundException,
+            NoSuchMethodException,
+            InvocationTargetException {
+
         apiDefinition = new ApiDefinition();
-        RegistAPIs();
+        RegistApiByRoutes();
     }
 
     public static DefinedAPIs Instance() {
@@ -65,99 +72,44 @@ public class DefinedAPIs {
         return apiDefinition.groupNames();
     }
 
-    private void RegistApi(String group_name,
-                           String url,
-                           String http_method,
-                           String controller_class,
-                           String method_name,
-                           String reply_class)
-            throws InstantiationException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException {
-
-        List<ApiInfo> apiInfoList = getApiListByGroup(group_name);
-        ApiInfo apiInfo = new ApiInfo(url, http_method, controller_class, method_name, reply_class);
-        apiInfoList.add(apiInfo);
-    }
-
-    private void RegistAPIs() throws InstantiationException,
+    public void RegistApi(String group_name,
+                          String url,
+                          String http_method,
+                          String controller_class,
+                          String method_name,
+                          String reply_class)
+            throws InstantiationException,
             IllegalAccessException,
             ClassNotFoundException,
             NoSuchMethodException,
             InvocationTargetException {
 
-        //<editor-fold desc="测试工具接口">
-//        RegistApi("测试工具接口",
-//                "/api/sample/Test",
-//                "GET",
-//                controllers.Sample.Sample.class.getName(),
-//                "Test",
-//                ReplyBase.class.getName()
-//        );
-//
-//        RegistApi("测试工具接口",
-//                "/api/sample/kktest",
-//                "GET",
-//                controllers.Sample.Sample.class.getName(),
-//                "kktest",
-//                ReplyBase.class.getName()
-//        );
-//
-//        RegistApi("测试工具接口",
-//                "/api/test/TriggerRepayment",
-//                "GET",
-//                controllers.Sample.Sample.class.getName(),
-//                "TriggerRepayment",
-//                ReplyBase.class.getName()
-//        );
-//
-//        RegistApi("测试工具接口",
-//                "/api/test/TriggerP2PReapyment",
-//                "GET",
-//                controllers.Sample.Sample.class.getName(),
-//                "TriggerP2PReapyment",
-//                ReplyBase.class.getName()
-//        );
-//
-//        RegistApi("测试工具接口",
-//                "/api/sample/TokenInfo",
-//                "GET",
-//                controllers.Sample.Sample.class.getName(),
-//                "TokenInfo",
-//                JsonNodeReply.class.getName()
-//        );
-//
-//        RegistApi("测试工具接口",
-//                "/api/sample/TestSendEmail",
-//                "GET",
-//                controllers.Sample.Sample.class.getName(),
-//                "TestSendEmail",
-//                ReplyBase.class.getName()
-//        );
-//
-//        RegistApi("测试工具接口",
-//                "/api/sample/TestPostJson",
-//                "POST JSON",
-//                controllers.Sample.Sample.class.getName(),
-//                "TestPostJson",
-//                ReplyBase.class.getName()
-//        );
-//
-//        RegistApi("测试工具接口",
-//                "/api/sample/TestPostForm",
-//                "POST FORM",
-//                controllers.Sample.Sample.class.getName(),
-//                "TestPostForm",
-//                ReplyBase.class.getName()
-//        );
-//        //</editor-fold>
+        List<ApiInfo> apiInfoList = getApiListByGroup(group_name);
+        if (apiInfoList.stream().filter(api_info -> api_info.url.equals(url)).count() == 0) {
+            // 避免加入重复的
+            ApiInfo apiInfo = new ApiInfo(url, http_method, controller_class, method_name, reply_class);
+            apiInfoList.add(apiInfo);
+        }
+    }
 
-        //<editor-fold desc="API 权限检查判断">
-        RegistApi("API 权限检查判断",
-                "/api/ApiAuthorization",
-                "GET",
-                K.Controllers.ApiDoc.Document.class.getName(),
-                "ApiAuthorization",
-                BooleanReply.class.getName()
-        );
-        //</editor-fold>
+    private void RegistApiByRoutes() {
+        List<RouteInfo> routeInfoList = RouteHelper.GetAllRoutes();
+        try {
+            for (RouteInfo routeInfo: routeInfoList) {
+                JsonApi api_anno = routeInfo.GetJsonApiAnnotation();
+                if (api_anno != null) {
+                    RegistApi(routeInfo.ControllerComment(),
+                            routeInfo.ApiUrl(),
+                            api_anno.ApiMethodType(),
+                            routeInfo.ControllerClassName(),
+                            routeInfo.ControllerMethodName(),
+                            api_anno.ReplyClass().getName()
+                    );
+                }
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
+
     }
 }

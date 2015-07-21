@@ -31,18 +31,14 @@ import java.util.*;
 
 public class DB {
 
-    public static EbeanServer ReadWriteDB() {
-        return Ebean.getServer(null);
-    }
-
     public static <T> T RunInTransaction(TxCallable<T> txCallable) {
         TxScope txScope = TxScope.requiresNew().setIsolation(TxIsolation.READ_COMMITED);
-        return ReadWriteDB().execute(txScope, txCallable);
+        return Ebean.execute(txScope, txCallable);
     }
 
     public static void RunInTransaction(TxRunnable txRunnable) {
         TxScope txScope = TxScope.requiresNew().setIsolation(TxIsolation.READ_COMMITED);
-        ReadWriteDB().execute(txScope, txRunnable);
+        Ebean.execute(txScope, txRunnable);
     }
 
     public static String GetCreateIndexSql() throws IOException {
@@ -138,7 +134,7 @@ public class DB {
 
     private static Map<String, String> getIndexedColumns(String tableName) {
         String sql = String.format("show index from `%s`", tableName);
-        List<SqlRow> rows = DB.ReadWriteDB().createSqlQuery(sql)
+        List<SqlRow> rows = Ebean.createSqlQuery(sql)
                 .findList();
         HashMap<String, String> indexMap = new HashMap<>();
         for (SqlRow row : rows) {

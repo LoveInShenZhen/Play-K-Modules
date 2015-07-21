@@ -7,13 +7,15 @@ package models.K.BgTask;
 import K.Ebean.DB;
 import K.DataDict.TaskStatus;
 import K.Common.Helper;
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Model;
 import com.avaje.ebean.TxCallable;
 import com.avaje.ebean.TxRunnable;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jodd.exception.ExceptionUtil;
 import play.Logger;
 import play.data.format.Formats;
-import play.db.ebean.Model;
+
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -77,7 +79,7 @@ public class PlanTask extends Model {
         planTask.json_data = Helper.ToJsonString(obj);
         planTask.tag = tag;
 
-        DB.ReadWriteDB().save(planTask);
+        Ebean.save(planTask);
     }
 
     public static void addTask(Object obj, String seqType, boolean requireSeq) {
@@ -95,7 +97,7 @@ public class PlanTask extends Model {
             addTask(obj, seqType, requireSeq, planRunTime, tag);
         } else {
             task.plan_run_time = planRunTime;
-            DB.ReadWriteDB().save(task);
+            Ebean.save(task);
         }
     }
 
@@ -116,7 +118,7 @@ public class PlanTask extends Model {
                         return null;
                     }
                     task.task_status = TaskStatus.WaitingInQueue.code;
-                    DB.ReadWriteDB().save(task);
+                    Ebean.save(task);
                     return task;
                 }
             });
@@ -134,7 +136,7 @@ public class PlanTask extends Model {
             @Override
             public void run() {
                 String sql = "update `plan_task` set `task_status`=:init_status where `task_status`=:old_status";
-                DB.ReadWriteDB().createSqlUpdate(sql)
+                Ebean.createSqlUpdate(sql)
                         .setParameter("init_status", TaskStatus.WaitingInDB.code)
                         .setParameter("old_status", TaskStatus.WaitingInQueue.code)
                         .execute();
