@@ -2,12 +2,14 @@ package controllers;
 
 import K.Aop.annotations.Comment;
 import K.Aop.annotations.JsonApi;
-import K.Controllers.ApiDoc.DocUtils;
+import K.Common.Helper;
 import K.Controllers.JsonpController;
 import K.Reply.ReplyBase;
+import models.K.BgTask.PlanTask;
 import play.Logger;
 import play.mvc.Result;
 
+import java.util.List;
 
 /**
  * Created by kk on 15/7/17.
@@ -20,8 +22,9 @@ public class Samples extends JsonpController {
     @JsonApi(ReplyClass = ReplyBase.class)
     public Result Test() {
         ReplyBase reply = new ReplyBase();
+        List<PlanTask> tasks = PlanTask.find.all();
+        tasks.forEach(planTask -> Logger.debug(Helper.ToJsonStringPretty(planTask)));
 
-        Logger.debug("\n{}", DocUtils.GeneratApiMarkdown());
 
         return ok(reply.ToJsonNode());
     }

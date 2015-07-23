@@ -791,4 +791,12 @@ public class Helper {
         return md;
     }
 
+    public static void SleepInMs(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (Exception ex) {
+            return;
+        }
+    }
+
 }

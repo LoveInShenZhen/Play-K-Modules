@@ -1,17 +1,15 @@
 package K.Service.PlanTasks;
 
-import K.Ebean.DB;
-import K.DataDict.TaskStatus;
 import K.Common.Helper;
+import K.DataDict.TaskStatus;
+import K.Ebean.DB;
 import K.Service.ServiceBase;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.TxRunnable;
 import jodd.exception.ExceptionUtil;
-
 import models.K.BgTask.PlanTask;
 import play.Configuration;
 import play.Logger;
-
 
 import java.util.concurrent.*;
 
@@ -64,6 +62,7 @@ public class PlanTaskService extends ServiceBase {
         if (Running()) {
             return;
         }
+
         Init();
         stop_now = false;
 
