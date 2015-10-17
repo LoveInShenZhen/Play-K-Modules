@@ -24,7 +24,7 @@ import javax.persistence.Table;
 import java.util.Date;
 
 @Entity
-@Table(name = "plan_task")
+@Table(name = "k_plan_task")
 public class PlanTask extends Model {
 
     @Id

@@ -14,7 +14,10 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface JsonApi {
+
     boolean Transactional() default true;
+
+    boolean UseEtag() default false;
 
     Class ReplyClass();
 

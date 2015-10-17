@@ -4,6 +4,7 @@ import K.Common.Helper;
 import com.google.common.eventbus.SubscriberExceptionContext;
 import com.google.common.eventbus.SubscriberExceptionHandler;
 import jodd.exception.ExceptionUtil;
+import models.K.EventBus.EventException;
 import play.Logger;
 
 /**
@@ -11,23 +12,17 @@ import play.Logger;
  */
 public class ExceptionLogHandler implements SubscriberExceptionHandler {
 
-    private String log_name = "EventBus";
-
     @Override
     public void handleException(Throwable exception, SubscriberExceptionContext context) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("========================================\n");
-        sb.append(String.format("EventBus: %s\n", context.getEventBus().getClass().getName()));
-        sb.append(String.format("Event Class: %s\n", context.getEvent().getClass().getName()));
-        sb.append(String.format("Event: %s\n", Helper.ToJsonStringPretty(context.getEvent())));
-        sb.append(String.format("Subscriber: %s\n", context.getSubscriber().getClass().getName()));
-        sb.append(String.format("SubscriberMethod: %s\n", context.getSubscriberMethod().getName()));
-        sb.append(String.format("Exception: %s", ExceptionUtil.exceptionToString(exception)));
-        sb.append("========================================\n\n");
 
-        Logger.of(log_name).error(sb.toString());
-        Logger.debug(sb.toString());
+        EventException exlog = new EventException();
+        exlog.bus_name = context.getEventBus().getClass().getName();
+        exlog.event_class = context.getEvent().getClass().getName();
+        exlog.event_json = Helper.ToJsonStringPretty(context.getEvent());
+        exlog.subscriber_class = context.getSubscriber().getClass().getName();
+        exlog.subscriber_method = context.getSubscriberMethod().getName();
+        exlog.exception = ExceptionUtil.exceptionToString(exception);
 
-        throw new RuntimeException(exception);
+        exlog.save();
     }
 }

@@ -29,7 +29,67 @@ import java.sql.Timestamp;
 import java.util.*;
 
 
+class IndexInfo {
+    public String index_name;
+    public Set<String> columns;
+
+    public IndexInfo(String index_name) {
+        this.index_name = index_name;
+        this.columns = new TreeSet<>();
+    }
+
+    public void AddClumn(String column) {
+        this.columns.add(column);
+    }
+
+    public boolean IsCombinedIndex() {
+        return this.columns.size() > 1;
+    }
+
+    public static Map<String, IndexInfo> LoadIndexInfoForTable(String tableName) {
+        Map<String, IndexInfo> index_map = new HashMap<>();
+        String sql = String.format("show index from `%s`", tableName);
+        List<SqlRow> rows = DB.ReadWriteDB().createSqlQuery(sql)
+                .findList();
+        for (SqlRow row: rows) {
+            String column_name = row.getString("Column_name");
+            String index_name = row.getString("Key_name");
+
+            if (!index_map.containsKey(index_name)) {
+                IndexInfo indexInfo = new IndexInfo(index_name);
+                index_map.put(index_name, indexInfo);
+            }
+
+            IndexInfo indexInfo = index_map.get(index_name);
+            indexInfo.AddClumn(column_name);
+        }
+
+        return index_map;
+    }
+
+    // 判断指定的字段是否有索引, 排除联合索引
+    public static boolean IndexExists(Map<String, IndexInfo> index_map, String column_name) {
+        for (String index_name : index_map.keySet()) {
+            IndexInfo indexInfo = index_map.get(index_name);
+            if (indexInfo.IsCombinedIndex()) {
+                continue;
+            }
+
+            if (indexInfo.columns.contains(column_name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+}
+
 public class DB {
+
+    public static EbeanServer ReadWriteDB() {
+        return Ebean.getServer(null);
+    }
 
     public static <T> T RunInTransaction(TxCallable<T> txCallable) {
         TxScope txScope = TxScope.requiresNew().setIsolation(TxIsolation.READ_COMMITED);
@@ -149,10 +209,10 @@ public class DB {
         Set<String> fieldNames = getIndexedFieldNames(modelClass);
 
         StringBuilder sb = new StringBuilder();
-        Map<String, String> indexMap = getIndexedColumns(tableName);
 
+        Map<String, IndexInfo> indexMap = IndexInfo.LoadIndexInfoForTable(tableName);
         for (String field_name : fieldNames) {
-            if (!indexMap.containsKey(field_name)) {
+            if (!IndexInfo.IndexExists(indexMap, field_name)) {
                 // 对应的字段索引不存在
                 String idx_name = String.format("idx_%s_%s", tableName, field_name);
                 String create_sql = String.format("CREATE INDEX `%s` ON `%s` (`%s`);",
@@ -173,14 +233,33 @@ public class DB {
     private static String GetDropIndexSqlBy(Class<?> modelClass) {
         String table_name = getTableName(modelClass);
         Set<String> UnIndexedFields = getUnIndexedFieldNames(modelClass);
-        Map<String, String> indexedColumns = getIndexedColumns(table_name);
+
         StringBuilder sb = new StringBuilder();
 
-        for (String name : UnIndexedFields) {
-            if (indexedColumns.containsKey(name)) {
-                sb.append(String.format("DROP INDEX `%s` ON `%s`;\n",
-                        indexedColumns.get(name),
-                        table_name));
+        Map<String, IndexInfo> index_map = IndexInfo.LoadIndexInfoForTable(table_name);
+
+        for (String field_name : UnIndexedFields) {
+            if (IndexInfo.IndexExists(index_map, field_name)) {
+                for (IndexInfo index_info: index_map.values()) {
+                    if (index_info.IsCombinedIndex()) {
+                        continue;
+                    }
+
+                    if (index_info.index_name.equalsIgnoreCase("PRIMARY")) {
+                        continue;
+                    }
+
+                    if (index_info.index_name.startsWith("uq_")) {
+                        continue;
+                    }
+
+                    if (index_info.columns.contains(field_name)) {
+                        sb.append(String.format("DROP INDEX `%s` ON `%s`;\n",
+                                index_info.index_name,
+                                table_name));
+                    }
+                }
+
             }
         }
         if (sb.length() > 0) {

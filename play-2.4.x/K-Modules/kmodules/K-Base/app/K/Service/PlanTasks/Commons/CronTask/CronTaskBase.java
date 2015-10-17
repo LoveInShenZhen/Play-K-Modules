@@ -17,7 +17,7 @@ public abstract class CronTaskBase implements Runnable {
     @Override
     public void run() {
         DoTask();
-
+        AddTask();
     }
 
     public abstract void DoTask();

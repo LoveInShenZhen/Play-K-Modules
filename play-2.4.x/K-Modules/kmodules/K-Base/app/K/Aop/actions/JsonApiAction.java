@@ -12,11 +12,13 @@ import com.avaje.ebean.TxCallable;
 import com.avaje.ebean.TxIsolation;
 import com.avaje.ebean.TxScope;
 import K.Controllers.JsonpController;
+import com.fasterxml.jackson.databind.JsonNode;
 import jodd.exception.ExceptionUtil;
 import play.Logger;
 import play.libs.F;
 import play.libs.Json;
 import play.mvc.Action;
+import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -36,6 +38,17 @@ public class JsonApiAction extends Action<JsonApi> {
     @Override
     public F.Promise<Result> call(Http.Context ctx) throws Throwable {
         before_call = new Date();
+
+        if (this.configuration.UseEtag() && this.configuration.Transactional()) {
+            // Etag 只能用于查询, 不能用于交易类(只对数据库有更新操作)的 api 上
+            // 所以, UseEtag 为 True 的时候, Transactional 必须是设置成 False, 否则抛出异常
+            ReplyBase reply = new ReplyBase();
+            reply.ret = -1;
+            reply.errmsg = "UseEtag 为 True 的时候, Transactional 必须是设置成 False";
+            Result result = play.mvc.Results.ok(Json.toJson(reply));
+            return F.Promise.pure(result);
+        }
+
         if (this.configuration.Transactional()) {
             return call_api_with_tran(ctx);
         } else {
@@ -84,9 +97,34 @@ public class JsonApiAction extends Action<JsonApi> {
     private F.Promise<Result> call_api(final Http.Context ctx) {
         try {
             try {
-                F.Promise<Result> resultPromise = delegate.call(ctx);
-                log("");
-                return resultPromise;
+                F.Promise<Result> api_result = delegate.call(ctx);
+
+                if (this.configuration.UseEtag() && ctx.args.containsKey("api_reply")) {
+                    // Api 使用 Etag 方式, 来标记Api的查询结果是否和上次一致(木有发生变化)
+                    JsonNode api_reply = (JsonNode) ctx.args.get("api_reply");
+                    String the_etag = Helper.SHA1OfString(api_reply.toString());
+
+                    // 保存本次查询结果的 Etag
+                    ctx.response().setHeader(Controller.ETAG, the_etag);
+
+                    if (ctx.request().hasHeader(Controller.IF_NONE_MATCH)) {
+                        // 需要检查, 本次查询结果和上一次的是否一致, 如果一致, 返回 304
+                        String last_etag = ctx.request().getHeader(Controller.IF_NONE_MATCH);
+                        if (the_etag.equals(last_etag)) {
+                            // 和上次的查询结果一致
+                            return F.Promise.pure(status(Controller.NOT_MODIFIED));
+                        } else {
+                            return api_result;
+                        }
+                    } else {
+                        // 没有 If-None-Match header
+                        return api_result;
+                    }
+                } else {
+                    // 不使用 Etag
+                    return api_result;
+                }
+
             } catch (RuntimeException e) {
                 throw e;
             } catch (Throwable t) {

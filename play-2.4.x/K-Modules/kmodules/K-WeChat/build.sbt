@@ -5,3 +5,5 @@ name := """K-WeChat"""
 //   cache,
 //   javaWs
 // )
+
+libraryDependencies += "org.simpleframework" % "simple-xml" % "2.7.1"

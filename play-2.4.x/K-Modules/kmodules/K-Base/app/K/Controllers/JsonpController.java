@@ -12,6 +12,9 @@ import play.mvc.Http;
 public class JsonpController extends Controller {
 
     public static Status ok(JsonNode content) {
+
+        JsonpController.ctx().args.put("api_reply", content);
+
         String callback = Http.Context.current().request().getQueryString("callback");
         if (StringUtils.isBlank(callback)) {
             return Controller.ok(content);
