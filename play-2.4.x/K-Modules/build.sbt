@@ -10,8 +10,8 @@ fork := true
 
 publishArtifact in(Compile, packageDoc) := false
 
-
 lazy val commonSettings = Seq(
+  publishMavenStyle := true,
   organization := "love.in.shenzhen",
   version := "1.0-SNAPSHOT",
   scalaVersion := "2.11.6",
