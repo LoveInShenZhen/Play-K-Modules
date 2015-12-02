@@ -3,10 +3,10 @@
 # ~~~~
 
 # Home page
-GET         /                               controllers.Application.index()
+GET         /                                  controllers.Application.index()
 
-POST        /api/sample/TestPostJson        K.Controllers.ApiDoc.ApiSample.TestPostJson(echo_msg)
-POST        /api/sample/TestPostForm        K.Controllers.ApiDoc.ApiSample.TestPostForm(echo_msg)
+POST        /api/sample/TestPostJson           K.Controllers.ApiDoc.ApiSample.TestPostJson(echo_msg)
+POST        /api/sample/TestPostForm           K.Controllers.ApiDoc.ApiSample.TestPostForm(echo_msg)
 
 GET         /api/doc/GeneratApiMarkdown        K.Controllers.ApiDoc.Document.GeneratApiMarkdown()
 GET         /api/doc/GeneratApiSample          K.Controllers.ApiDoc.Document.GeneratApiSample(api_url)
@@ -14,9 +14,11 @@ GET         /api/doc/GeneratApiTestPage        K.Controllers.ApiDoc.Document.Gen
 #GET         /api/version                                               controllers.Sample.Sample.SvnVersion()
 #GET         /api/CreateIndexSql                                        controllers.Sample.Sample.CreateIndexSql()
 
-GET         /api/sample/Test                controllers.Samples.Test()
+GET         /api/sample/Test                   controllers.Samples.Test()
 
+
+GET         /sys/notify/NewPlanTask            K.Controllers.PlanTask.PlanTaskNotify.NewPlanTask()
 
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                   controllers.Assets.versioned(path="/public", file: Asset)
+GET         /assets/*file                      controllers.Assets.versioned(path="/public", file: Asset)

@@ -10,15 +10,11 @@ import java.util.Date;
  */
 public abstract class EventBase {
 
-    private Date create_time;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSS", timezone = "Asia/Shanghai")
+    public Date create_time;
 
     public String ToJson() {
         return Helper.ToJsonStringPretty(this);
-    }
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSSS", timezone = "Asia/Shanghai")
-    public Date getCreateTime() {
-        return create_time;
     }
 
     public EventBase() {

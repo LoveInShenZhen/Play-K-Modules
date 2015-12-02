@@ -3,6 +3,17 @@
 
 # --- !Ups
 
+create table k_event_exception (
+  id                        bigint auto_increment not null,
+  bus_name                  VARCHAR(1024) COMMENT 'Event Bus Name',
+  event_class               VARCHAR(1024) COMMENT 'Event Object Class Name',
+  event_json                TEXT COMMENT 'Event Object Json Data',
+  subscriber_class          VARCHAR(1024) COMMENT 'Event Subscriber Class Name',
+  subscriber_method         VARCHAR(256) COMMENT 'Event Subscriber Method Name',
+  exception                 TEXT COMMENT 'Exception Message',
+  constraint pk_k_event_exception primary key (id))
+;
+
 create table k_attachment (
   id                        bigint auto_increment not null,
   file_name                 VARCHAR(256) DEFAULT '' COMMENT '附件材料名称,即扫描件文件名称',
@@ -28,6 +39,36 @@ create table plan_task (
   tag                       VARCHAR(256) DEFAULT '' COMMENT '标签,用于保存任务相关的额外数据',
   remarks                   TEXT COMMENT '发生异常情况的时候, 用于记录额外信息',
   constraint pk_plan_task primary key (id))
+;
+
+create table k_sys_conf (
+  id                        bigint auto_increment not null,
+  conf_key                  VARCHAR(128) COMMENT '配置项名称' not null,
+  conf_value                VARCHAR(256) COMMENT '配置项值',
+  ext_info                  VARCHAR(1024) COMMENT '配置项备注',
+  constraint uq_k_sys_conf_conf_key unique (conf_key),
+  constraint pk_k_sys_conf primary key (id))
+;
+
+create table k_users (
+  id                        bigint auto_increment not null,
+  user_id                   CHAR(40) COMMENT '用户 UUID' not null,
+  user_name                 VARCHAR(64) DEFAULT NULL COMMENT '用户名',
+  password                  VARCHAR(128) COMMENT '二次防字典工具加密后的密码',
+  mobile                    VARCHAR(16) DEFAULT NULL COMMENT '用户手机',
+  email                     VARCHAR(64) DEFAULT NULL COMMENT '用户邮箱',
+  weixinid                  VARCHAR(64) DEFAULT NULL COMMENT '微信号',
+  real_name                 VARCHAR(32) DEFAULT NULL COMMENT '真实姓名',
+  id_no                     VARCHAR(18) DEFAULT NULL COMMENT '身份证号码',
+  ext_attr                  TEXT DEFAULT NULL COMMENT '扩展属性',
+  constraint uq_k_users_user_id unique (user_id),
+  constraint uq_k_users_user_name unique (user_name),
+  constraint uq_k_users_mobile unique (mobile),
+  constraint uq_k_users_email unique (email),
+  constraint uq_k_users_weixinid unique (weixinid),
+  constraint uq_k_users_real_name unique (real_name),
+  constraint uq_k_users_id_no unique (id_no),
+  constraint pk_k_users primary key (id))
 ;
 
 create table api_server_boot (
@@ -62,9 +103,15 @@ create table api_log (
 
 SET FOREIGN_KEY_CHECKS=0;
 
+drop table k_event_exception;
+
 drop table k_attachment;
 
 drop table plan_task;
+
+drop table k_sys_conf;
+
+drop table k_users;
 
 drop table api_server_boot;
 

@@ -4,57 +4,48 @@ import K.Common.Helper;
 import K.DataDict.TaskStatus;
 import K.Ebean.DB;
 import K.Service.ServiceBase;
-import com.avaje.ebean.Ebean;
 import com.avaje.ebean.TxRunnable;
+import jodd.datetime.JDateTime;
 import jodd.exception.ExceptionUtil;
 import models.K.BgTask.PlanTask;
-import play.Configuration;
 import play.Logger;
 
-import java.util.concurrent.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class PlanTaskService extends ServiceBase {
 
     public static final String ServiceName = "PlanTaskService";
 
-    private int task_loader_wait_time = 1;
+    private int task_loader_wait_time = 5;
     private boolean stop_now;
 
-    private ExecutorService seq_worker;
-    private ExecutorService parallel_worker;
-
-    private BlockingQueue<PlanTask> seq_task_queue;
-    private BlockingQueue<PlanTask> parallel_task_queue;
+    private ScheduledExecutorService seq_worker;
+    private ScheduledExecutorService parallel_worker;
 
     private Thread seq_task_loader;
     private Thread parallel_task_loader;
 
-    private Object seq_task_notifier;
-    private Object parallel_task_notifier;
+    private Object task_notifier;
 
     private int parallel_worker_thread_count = 4;
 
-    private Configuration configuration;
 
-    public PlanTaskService(Configuration config) {
+    public PlanTaskService() {
         super(ServiceName);
-        seq_task_notifier = new Object();
-        parallel_task_notifier = new Object();
+        task_notifier = new Object();
         stop_now = false;
-        configuration = config;
+        PlanTask.ResetTaskStatus();
     }
 
     private void Init() {
+        parallel_worker = Executors.newScheduledThreadPool(parallel_worker_thread_count);
 
-        PlanTask.ResetTaskStatus();
-
-        LoadCronTasks();
-
-        parallel_task_queue = new ArrayBlockingQueue<>(parallel_worker_thread_count * 2);
-        parallel_worker = Executors.newCachedThreadPool();
-
-        seq_task_queue = new ArrayBlockingQueue<>(2);
-        seq_worker = Executors.newSingleThreadExecutor();
+        seq_worker = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Override
@@ -62,18 +53,14 @@ public class PlanTaskService extends ServiceBase {
         if (Running()) {
             return;
         }
-
         Init();
         stop_now = false;
 
-        start_seq_task_loader();
-        start_seq_worker();
-
-        start_parallel_task_loader();
-        start_parallel_worker();
+        start_task_loader(true);
+        start_task_loader(false);
 
         setRunning(true);
-        Logger.debug("==>     Plan Task Service Started......");
+        Logger.debug("Plan Task Service Started......");
     }
 
     @Override
@@ -83,12 +70,14 @@ public class PlanTaskService extends ServiceBase {
         }
 
         stop_now = true;
+        Logger.debug("==> Try to stop plan task loader...");
         NotifyNewTask();
 
         try {
             parallel_task_loader.join(120000);
             seq_task_loader.join(120000);
 
+            Logger.debug("==> Try to stop plan task worker...");
             parallel_worker.shutdown();
             seq_worker.shutdown();
 
@@ -101,69 +90,8 @@ public class PlanTaskService extends ServiceBase {
         }
 
         setRunning(false);
-        Logger.debug("==>     Plan Task Service Stopped......");
+        Logger.debug("Plan Task Service Stopped......");
         return true;
-    }
-
-    private void start_seq_task_loader() {
-        seq_task_loader = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                PlanTask task = null;
-                while (true) {
-                    if (stop_now) return;
-
-                    try {
-                        if (task == null) {
-                            // 从DB 里加载一个任务, 同时, 任务也从数据库里删除掉了
-                            task = PlanTask.LoadTaskFromDb(true);
-                        }
-
-                        if (task == null) {
-                            // 没有任务, 等通知
-                            synchronized (seq_task_notifier) {
-                                seq_task_notifier.wait(task_loader_wait_time * 1000);
-                            }
-                            continue;
-                        }
-
-                        // 有任务, 刚从 DB 里加载的, 或者是上次没有成功加入队列的
-                        // 再一次试图加入到队列里
-                        boolean ret = seq_task_queue.offer(task, 1, TimeUnit.SECONDS);
-                        if (ret) {
-                            // 成功加入到队列, 设置 task=null, 则下一次的循环就可以再次从
-                            // DB 里加载任务了
-                            task = null;
-                        }
-
-                    } catch (Exception ex) {
-                        Logger.error(Helper.StackTraceOfEx(ex));
-                    }
-
-                }
-            }
-        });
-
-        seq_task_loader.start();
-    }
-
-    private void start_seq_worker() {
-        seq_worker.submit(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    if (stop_now && seq_task_queue.isEmpty()) {
-                        return;
-                    }
-                    try {
-                        PlanTask task = seq_task_queue.poll(1, TimeUnit.SECONDS);
-                        process_task(task);
-                    } catch (Exception ex) {
-                        Logger.error(ExceptionUtil.exceptionChainToString(ex));
-                    }
-                }
-            }
-        });
     }
 
     private void process_task(final PlanTask task) {
@@ -178,7 +106,7 @@ public class PlanTaskService extends ServiceBase {
                             @Override
                             public void run() {
                                 run_entity.run();
-                                Ebean.delete(task);
+                                DB.ReadWriteDB().delete(task);
                             }
                         });
                     } catch (Exception ex) {
@@ -191,7 +119,7 @@ public class PlanTaskService extends ServiceBase {
                             public void run() {
                                 task.task_status = TaskStatus.Exception.code;
                                 task.remarks = ex_msg;
-                                Ebean.save(task);
+                                DB.ReadWriteDB().save(task);
                             }
                         });
 
@@ -203,78 +131,99 @@ public class PlanTaskService extends ServiceBase {
         }
     }
 
-    private void start_parallel_task_loader() {
-        parallel_task_loader = new Thread(new Runnable() {
+    private void start_task_loader(boolean require_seq) {
+        final List<PlanTask> loaded_tasks = new ArrayList<>();
+
+        final ScheduledExecutorService worker;
+        if (require_seq) {
+            worker = this.seq_worker;
+        } else {
+            worker = this.parallel_worker;
+        }
+
+        Thread task_loader = new Thread(new Runnable() {
             @Override
             public void run() {
-                PlanTask task = null;
                 while (true) {
                     if (stop_now) return;
 
                     try {
-                        if (task == null) {
-                            // 从DB 里加载一个任务, 同时, 任务也从数据库里删除掉了
-                            task = PlanTask.LoadTaskFromDb(false);
-                        }
+                        // Load tasks to parallel_worker
+                        DB.RunInTransaction(new TxRunnable() {
+                            @Override
+                            public void run() {
+                                JDateTime end_time = new JDateTime();
+                                end_time.addSecond(task_loader_wait_time + 1);
 
-                        if (task == null) {
-                            // 没有任务, 等通知
-                            synchronized (parallel_task_notifier) {
-                                parallel_task_notifier.wait(task_loader_wait_time * 1000);
+                                List<PlanTask> taskList = PlanTask.find.where()
+                                        .eq("require_seq", require_seq)
+                                        .eq("task_status", TaskStatus.WaitingInDB.code)
+                                        .le("plan_run_time", end_time.convertToDate())
+                                        .orderBy("id")
+                                        .findList();
+
+                                for (PlanTask task : taskList) {
+                                    task.task_status = TaskStatus.WaitingInQueue.code;
+                                    DB.ReadWriteDB().save(task);
+                                }
+
+                                loaded_tasks.clear();
+                                loaded_tasks.addAll(taskList);
                             }
+                        });
 
-                            continue;
+                        for (PlanTask task : loaded_tasks) {
+                            SchedulePlanTask(task, worker);
                         }
-                        // 有任务, 刚从 DB 里加载的, 或者是上次没有成功加入队列的
-                        // 再一次试图加入到队列里
-                        boolean ret = parallel_task_queue.offer(task, 1, TimeUnit.SECONDS);
-                        if (ret) {
-                            // 成功加入到队列, 设置 task=null, 则下一次的循环就可以再次从
-                            // DB 里加载任务了
-                            task = null;
+
+                        if (loaded_tasks.size() == 0) {
+                            try {
+                                synchronized (task_notifier) {
+                                    task_notifier.wait(task_loader_wait_time * 1000);
+                                }
+                            } catch (Exception ex) {
+                                // do nothing
+                            }
                         }
+
                     } catch (Exception e) {
                         Logger.error(Helper.StackTraceOfEx(e));
                     }
                 }
             }
         });
-        parallel_task_loader.start();
+        task_loader.start();
+
+        if (require_seq) {
+            this.seq_task_loader = task_loader;
+        } else {
+            this.parallel_task_loader = task_loader;
+        }
     }
 
-    private void start_parallel_worker() {
-        for (int i = 0; i < parallel_worker_thread_count; ++i) {
-            parallel_worker.submit(new Runnable() {
-                @Override
-                public void run() {
-                    while (true) {
-                        if (stop_now && parallel_task_queue.isEmpty()) {
-                            return;
-                        }
+    private void SchedulePlanTask(final PlanTask task, final ScheduledExecutorService woker) {
+        JDateTime now = new JDateTime();
+        JDateTime plan_run_time = new JDateTime(task.plan_run_time);
+        long interval = plan_run_time.getTimeInMillis() - now.getTimeInMillis();
+        long delay = interval > 0 ? interval : 0;
 
-                        try {
-                            PlanTask task = parallel_task_queue.poll(1, TimeUnit.SECONDS);
-                            process_task(task);
-                        } catch (Exception ex) {
-                            Logger.error(ExceptionUtil.exceptionChainToString(ex));
-                        }
-                    }
-                }
-            });
-        }
+        woker.schedule(new Runnable() {
+                           @Override
+                           public void run() {
+                               try {
+                                   process_task(task);
+                               } catch (Exception ex) {
+                                   Logger.error(ExceptionUtil.exceptionChainToString(ex));
+                               }
+                           }
+                       },
+                delay,
+                TimeUnit.MILLISECONDS);
     }
 
     public void NotifyNewTask() {
-//        Logger.debug("==> someone NotifyNewTask");
-        synchronized (seq_task_notifier) {
-            seq_task_notifier.notifyAll();
+        synchronized (task_notifier) {
+            task_notifier.notifyAll();
         }
-        synchronized (parallel_task_notifier) {
-            parallel_task_notifier.notifyAll();
-        }
-    }
-
-    private void LoadCronTasks() {
-
     }
 }

@@ -16,14 +16,9 @@ public class ExceptionHandler implements SubscriberExceptionHandler {
 
     private ArrayList<SubscriberExceptionHandler> handlers;
 
-    private Configuration configuration;
-
-    public ExceptionHandler(Configuration configuration) {
-        this.configuration = configuration;
-
+    public ExceptionHandler() {
         handlers = new ArrayList<>();
         loadHandlersByConfig();
-
     }
 
     @Override
@@ -36,7 +31,7 @@ public class ExceptionHandler implements SubscriberExceptionHandler {
     private void loadHandlersByConfig() {
         try {
             List<String> defautClsNames = new ArrayList<>();
-            List<String> clsNameList = this.configuration.getStringList("EventBusService.ExceptionHandlers", defautClsNames);
+            List<String> clsNameList = Configuration.root().getStringList("EventBus.ExceptionHandlers", defautClsNames);
             if (!clsNameList.contains(ExceptionLogHandler.class.getName())) {
                 clsNameList.add(ExceptionLogHandler.class.getName());
             }

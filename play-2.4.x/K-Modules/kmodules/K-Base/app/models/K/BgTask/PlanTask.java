@@ -4,17 +4,13 @@ package models.K.BgTask;
  * Created by kk on 14-1-21.
  */
 
-import K.Ebean.DB;
-import K.DataDict.TaskStatus;
 import K.Common.Helper;
-import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Model;
-import com.avaje.ebean.TxCallable;
+import K.DataDict.TaskStatus;
+import K.Ebean.DB;
 import com.avaje.ebean.TxRunnable;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jodd.exception.ExceptionUtil;
-import play.Logger;
 import play.data.format.Formats;
+import play.db.ebean.Model;
 
 
 import javax.persistence.Column;
@@ -24,7 +20,7 @@ import javax.persistence.Table;
 import java.util.Date;
 
 @Entity
-@Table(name = "k_plan_task")
+@Table(name = "plan_task")
 public class PlanTask extends Model {
 
     @Id
@@ -79,7 +75,7 @@ public class PlanTask extends Model {
         planTask.json_data = Helper.ToJsonString(obj);
         planTask.tag = tag;
 
-        Ebean.save(planTask);
+        DB.ReadWriteDB().save(planTask);
     }
 
     public static void addTask(Object obj, String seqType, boolean requireSeq) {
@@ -97,37 +93,7 @@ public class PlanTask extends Model {
             addTask(obj, seqType, requireSeq, planRunTime, tag);
         } else {
             task.plan_run_time = planRunTime;
-            Ebean.save(task);
-        }
-    }
-
-    public static PlanTask LoadTaskFromDb(final boolean requireSeqTask) {
-        try {
-            PlanTask task = DB.RunInTransaction(new TxCallable<PlanTask>() {
-                @Override
-                public PlanTask call() {
-                    Date now = new Date();
-                    PlanTask task = PlanTask.find.where()
-                            .eq("require_seq", requireSeqTask)
-                            .eq("task_status", TaskStatus.WaitingInDB.code)
-                            .le("plan_run_time", now)
-                            .orderBy("id")
-                            .setMaxRows(1)
-                            .findUnique();
-                    if (task == null) {
-                        return null;
-                    }
-                    task.task_status = TaskStatus.WaitingInQueue.code;
-                    Ebean.save(task);
-                    return task;
-                }
-            });
-            return task;
-
-        } catch (Exception ex) {
-            Logger.error(String.format("Failed for LoadTaskFromDb: %s",
-                    ExceptionUtil.exceptionChainToString(ex)));
-            return null;
+            DB.ReadWriteDB().save(task);
         }
     }
 
@@ -136,7 +102,7 @@ public class PlanTask extends Model {
             @Override
             public void run() {
                 String sql = "update `plan_task` set `task_status`=:init_status where `task_status`=:old_status";
-                Ebean.createSqlUpdate(sql)
+                DB.ReadWriteDB().createSqlUpdate(sql)
                         .setParameter("init_status", TaskStatus.WaitingInDB.code)
                         .setParameter("old_status", TaskStatus.WaitingInQueue.code)
                         .execute();
