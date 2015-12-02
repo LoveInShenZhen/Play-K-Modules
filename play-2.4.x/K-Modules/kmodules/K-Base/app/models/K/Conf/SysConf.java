@@ -3,7 +3,7 @@ package models.K.Conf;
 
 import K.Aop.annotations.DBIndexed;
 import K.Aop.annotations.WithPersistLog;
-import play.db.ebean.Model;
+import com.avaje.ebean.Model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

@@ -7,11 +7,10 @@ package models.K.BgTask;
 import K.Common.Helper;
 import K.DataDict.TaskStatus;
 import K.Ebean.DB;
+import com.avaje.ebean.Model;
 import com.avaje.ebean.TxRunnable;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import play.data.format.Formats;
-import play.db.ebean.Model;
-
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -45,13 +44,13 @@ public class PlanTask extends Model {
     @Column(columnDefinition = "INTEGER DEFAULT 0 COMMENT '任务状态: 0:WaitingInDB, 7:WaitingInQueue, 8:Exception'", nullable = false)
     public int task_status;
 
-    @Column(columnDefinition = "VARCHAR(256) COMMENT 'Runable task class name'", nullable = false)
+    @Column(columnDefinition = "VARCHAR(1024) COMMENT 'Runable task class name'", nullable = false)
     public String class_name;
 
     @Column(columnDefinition = "TEXT COMMENT 'Runable task class json data'", nullable = false)
     public String json_data;
 
-    @Column(columnDefinition = "VARCHAR(256) DEFAULT '' COMMENT '标签,用于保存任务相关的额外数据'")
+    @Column(columnDefinition = "TEXT COMMENT '标签,用于保存任务相关的额外数据'")
     public String tag;
 
     @Column(columnDefinition = "TEXT COMMENT '发生异常情况的时候, 用于记录额外信息'")
