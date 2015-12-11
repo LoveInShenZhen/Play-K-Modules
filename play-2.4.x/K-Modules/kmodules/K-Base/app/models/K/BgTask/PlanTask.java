@@ -56,7 +56,8 @@ public class PlanTask extends Model {
     @Column(columnDefinition = "TEXT COMMENT '发生异常情况的时候, 用于记录额外信息'")
     public String remarks;
 
-    public static Finder<Long, PlanTask> find = new Finder<>(Long.class, PlanTask.class);
+    public static Finder<Long, PlanTask> find = new Finder<Long, PlanTask>(PlanTask.class);
+
 
     public static void addTask(Object obj, String seqType, boolean requireSeq, Date planRunTime) {
         addTask(obj, seqType, requireSeq, planRunTime, "");

@@ -53,7 +53,8 @@ public class KAttachment extends Model {
     @Column(columnDefinition = "TEXT COMMENT '备注信息'")
     public String remarks;
 
-    public static Finder<Long, KAttachment> find = new Finder<>(Long.class, KAttachment.class);
+    public static Finder<Long, KAttachment> find = new Finder<Long, KAttachment>(KAttachment.class);
+
 
     public boolean IsImage() {
         if (content_type.equalsIgnoreCase("image/jpg")

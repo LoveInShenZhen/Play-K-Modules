@@ -56,4 +56,7 @@ public class Users extends Model {
     @DBIndexed
     @Column(columnDefinition = "TEXT DEFAULT NULL COMMENT '扩展属性'")
     public String ext_attr;
+
+    public static Finder<Long, Users> find = new Finder<Long, Users>(Users.class);
+
 }

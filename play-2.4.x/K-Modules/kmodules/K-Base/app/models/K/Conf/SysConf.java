@@ -4,6 +4,7 @@ package models.K.Conf;
 import K.Aop.annotations.DBIndexed;
 import K.Aop.annotations.WithPersistLog;
 import com.avaje.ebean.Model;
+import play.api.i18n.Lang;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,6 +33,6 @@ public class SysConf extends Model {
     @Column(columnDefinition = "VARCHAR(1024) COMMENT '配置项备注'")
     public String ext_info;
 
-    public static Finder<Long, SysConf> find = new Finder<>(Long.class, SysConf.class);
+    public static Finder<Long, SysConf> find = new Finder<Long, SysConf>(SysConf.class);
 
 }

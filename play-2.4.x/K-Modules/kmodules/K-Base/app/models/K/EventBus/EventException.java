@@ -36,5 +36,6 @@ public class EventException extends Model {
     @Column(columnDefinition = "TEXT COMMENT 'Exception Message'")
     public String exception;
 
-    public static Model.Finder<Long, EventException> find = new Model.Finder<>(Long.class, EventException.class);
+    public static Finder<Long, EventException> find = new Finder<Long, EventException>(EventException.class);
+
 }
