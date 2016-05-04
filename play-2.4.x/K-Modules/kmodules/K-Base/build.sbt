@@ -16,12 +16,17 @@ libraryDependencies += "com.google.code.maven-play-plugin.org.playframework" % "
 
 libraryDependencies += "commons-io" % "commons-io" % "2.4"
 
-libraryDependencies += "org.jodd" % "jodd-core" % "3.6.4"
+libraryDependencies += "org.jodd" % "jodd-core" % "3.6.7"
 
-libraryDependencies += "org.jodd" % "jodd-bean" % "3.6.4"
+libraryDependencies += "org.jodd" % "jodd-bean" % "3.6.7"
 
-libraryDependencies += "org.jodd" % "jodd-http" % "3.6.4"
+libraryDependencies += "org.jodd" % "jodd-http" % "3.6.7"
 
-libraryDependencies += "org.jodd" % "jodd-mail" % "3.6.4"
+libraryDependencies += "org.jodd" % "jodd-mail" % "3.6.7"
 
 libraryDependencies += "org.freemarker" % "freemarker" % "2.3.21"
+
+libraryDependencies += "org.xhtmlrenderer" % "flying-saucer-pdf" % "9.0.8"
+
+libraryDependencies += "net.sourceforge.jexcelapi" % "jxl" % "2.6.12"
+

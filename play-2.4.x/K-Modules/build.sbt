@@ -20,26 +20,26 @@ lazy val commonSettings = Seq(
 
 lazy val k_base = (project in file("kmodules/K-Base"))
   .settings(commonSettings: _*)
-  .enablePlugins(PlayJava, PlayEbean, PlayScala)
+  .enablePlugins(PlayJava, PlayEbean)
 
 lazy val k_users = (project in file("kmodules/K-Users"))
   .settings(commonSettings: _*)
-  .enablePlugins(PlayJava, PlayEbean, PlayScala)
+//  .enablePlugins(PlayEbean)
   .dependsOn(k_base)
 
 lazy val k_sms = (project in file("kmodules/K-SMS"))
   .settings(commonSettings: _*)
-  .enablePlugins(PlayJava)
+  // .enablePlugins(PlayJava)
   .dependsOn(k_base)
 
 lazy val k_wechat = (project in file("kmodules/K-WeChat"))
   .settings(commonSettings: _*)
-  .enablePlugins(PlayJava)
+  // .enablePlugins(PlayJava)
   .dependsOn(k_base, k_users)
 
 lazy val k_chinapnr = (project in file("kmodules/K-ChinaPnr"))
   .settings(commonSettings: _*)
-  .enablePlugins(PlayJava)
+  // .enablePlugins(PlayJava)
   .dependsOn(k_base)
 
 lazy val root = (project in file("."))
@@ -66,5 +66,3 @@ ivyScala := ivyScala.value map {
 routesGenerator := InjectedRoutesGenerator
 
 libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.36"
-
-

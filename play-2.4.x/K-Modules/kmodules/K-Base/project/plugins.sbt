@@ -1,5 +1,5 @@
 // The Play plugin
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.4")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.6")
 
 
 // Play enhancer - this automatically generates getters/setters for public fields

@@ -34,11 +34,17 @@ create table plan_task (
   create_time               DATETIME COMMENT '任务创建时间' not null,
   plan_run_time             DATETIME COMMENT '任务计划执行时间' not null,
   task_status               INTEGER DEFAULT 0 COMMENT '任务状态: 0:WaitingInDB, 7:WaitingInQueue, 8:Exception' not null,
-  class_name                VARCHAR(256) COMMENT 'Runable task class name' not null,
+  class_name                VARCHAR(1024) COMMENT 'Runable task class name' not null,
   json_data                 TEXT COMMENT 'Runable task class json data' not null,
-  tag                       VARCHAR(256) DEFAULT '' COMMENT '标签,用于保存任务相关的额外数据',
+  tag                       TEXT COMMENT '标签,用于保存任务相关的额外数据',
   remarks                   TEXT COMMENT '发生异常情况的时候, 用于记录额外信息',
   constraint pk_plan_task primary key (id))
+;
+
+create table sample_model (
+  id                        bigint auto_increment not null,
+  plan_run_time             DATETIME COMMENT '任务计划执行时间',
+  constraint pk_sample_model primary key (id))
 ;
 
 create table k_sys_conf (
@@ -50,25 +56,25 @@ create table k_sys_conf (
   constraint pk_k_sys_conf primary key (id))
 ;
 
-create table k_users (
+create table k_user (
   id                        bigint auto_increment not null,
   user_id                   CHAR(40) COMMENT '用户 UUID' not null,
   user_name                 VARCHAR(64) DEFAULT NULL COMMENT '用户名',
   password                  VARCHAR(128) COMMENT '二次防字典工具加密后的密码',
   mobile                    VARCHAR(16) DEFAULT NULL COMMENT '用户手机',
   email                     VARCHAR(64) DEFAULT NULL COMMENT '用户邮箱',
-  weixinid                  VARCHAR(64) DEFAULT NULL COMMENT '微信号',
+  weixin_id                 VARCHAR(64) DEFAULT NULL COMMENT '微信号',
   real_name                 VARCHAR(32) DEFAULT NULL COMMENT '真实姓名',
   id_no                     VARCHAR(18) DEFAULT NULL COMMENT '身份证号码',
   ext_attr                  TEXT DEFAULT NULL COMMENT '扩展属性',
-  constraint uq_k_users_user_id unique (user_id),
-  constraint uq_k_users_user_name unique (user_name),
-  constraint uq_k_users_mobile unique (mobile),
-  constraint uq_k_users_email unique (email),
-  constraint uq_k_users_weixinid unique (weixinid),
-  constraint uq_k_users_real_name unique (real_name),
-  constraint uq_k_users_id_no unique (id_no),
-  constraint pk_k_users primary key (id))
+  constraint uq_k_user_user_id unique (user_id),
+  constraint uq_k_user_user_name unique (user_name),
+  constraint uq_k_user_mobile unique (mobile),
+  constraint uq_k_user_email unique (email),
+  constraint uq_k_user_weixin_id unique (weixin_id),
+  constraint uq_k_user_real_name unique (real_name),
+  constraint uq_k_user_id_no unique (id_no),
+  constraint pk_k_user primary key (id))
 ;
 
 create table api_server_boot (
@@ -109,9 +115,11 @@ drop table k_attachment;
 
 drop table plan_task;
 
+drop table sample_model;
+
 drop table k_sys_conf;
 
-drop table k_users;
+drop table k_user;
 
 drop table api_server_boot;
 

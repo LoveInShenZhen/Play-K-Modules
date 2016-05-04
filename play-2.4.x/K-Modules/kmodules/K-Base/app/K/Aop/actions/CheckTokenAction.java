@@ -1,6 +1,7 @@
 package K.Aop.actions;
 
 
+import K.Controllers.JsonpController;
 import K.Reply.ReplyBase;
 import K.Common.Token;
 import K.Common.TokenObject;
@@ -50,7 +51,7 @@ public class CheckTokenAction extends Action<CheckToken> {
                 // 没有权限调用此 api
                 reply.ret = -4;
                 reply.errmsg = "没有权限调用此 api";
-                Result result = play.mvc.Results.ok(Json.toJson(reply));
+                Result result = JsonpController.ok(reply);
                 return F.Promise.pure(result);
             }
         }

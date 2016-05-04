@@ -25,12 +25,7 @@ public class UrlCacheAction extends Action<UrlCache> {
             F.Promise<Result> promise;
             if (result == null) {
                 promise = delegate.call(ctx);
-                promise.onRedeem(new F.Callback<Result>() {
-                    @Override
-                    public void invoke(Result Result) throws Throwable {
-                        InProcessCache.Put(key, Result, expireTime);
-                    }
-                });
+                promise.onRedeem(Result -> InProcessCache.Put(key, Result, expireTime));
             } else {
                 promise = F.Promise.pure(result);
             }

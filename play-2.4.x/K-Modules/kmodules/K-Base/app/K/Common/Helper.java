@@ -8,17 +8,29 @@ package K.Common;
  * To change this template use File | Settings | File Templates.
  */
 
+import K.Aop.annotations.Comment;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.Hashing;
+import com.lowagie.text.pdf.BaseFont;
+import jodd.datetime.JDateTime;
 import jodd.exception.ExceptionUtil;
 import jodd.io.FileUtil;
+import jodd.util.ReflectUtil;
+import jxl.Workbook;
+import jxl.write.*;
+import jxl.write.Number;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.w3c.dom.Document;
+import org.xhtmlrenderer.pdf.ITextFontResolver;
+import org.xhtmlrenderer.pdf.ITextRenderer;
 import play.Logger;
 import play.Play;
 import play.libs.Json;
@@ -29,16 +41,16 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Helper {
 
@@ -46,7 +58,7 @@ public class Helper {
         try {
             return Helper.class.getClassLoader().loadClass(class_name);
         } catch (Exception ex) {
-            throw new RuntimeException(String.format("Can not load class: %s", class_name));
+            throw new BizLogicException("Can not load class: %s", class_name);
         }
     }
 
@@ -145,6 +157,14 @@ public class Helper {
         return fmt.format(amount);
     }
 
+    public static String MoneyColorFmt(Double amount) {
+        if (amount == null) return "0.00";
+        DecimalFormat fmt = new DecimalFormat("#0.00");
+        fmt.setRoundingMode(RoundingMode.DOWN);
+        // todo
+        return fmt.format(amount);
+    }
+
     public static Double MoneyValue(Double amount) {
         return Double.parseDouble(MoneyFmt(amount));
     }
@@ -152,20 +172,6 @@ public class Helper {
     public static String Long2String(long amount, String format) {
         DecimalFormat fmt = new DecimalFormat(format);
         return fmt.format(amount);
-    }
-
-    public static boolean ParserBoolean(Object obj) {
-        if (obj instanceof Boolean) {
-            return (Boolean) obj;
-        }
-        if (obj instanceof Integer) {
-            return (Integer) obj > 0;
-        }
-        if (obj instanceof String) {
-            String v = (String) obj;
-            return v.equalsIgnoreCase("true");
-        }
-        return false;
     }
 
     public static String Days2Months(int days) {
@@ -268,29 +274,29 @@ public class Helper {
         return (int) (diff_in_ms / 3600000 / 24);
     }
 
-    public static boolean After(Date before, Date after) {
-        Calendar a = Calendar.getInstance();
-        a.setTime(after);
-        Calendar b = Calendar.getInstance();
-        b.setTime(before);
-
-        a.set(Calendar.HOUR_OF_DAY, 0);
-        a.set(Calendar.MINUTE, 0);
-        a.set(Calendar.SECOND, 0);
-        a.set(Calendar.MILLISECOND, 0);
-
-        b.set(Calendar.HOUR_OF_DAY, 0);
-        b.set(Calendar.MINUTE, 0);
-        b.set(Calendar.SECOND, 0);
-        b.set(Calendar.MILLISECOND, 0);
-
-        return a.after(b);
-    }
-
     public static Date getCurrentDate(String fmt) {
         SimpleDateFormat df = new SimpleDateFormat(fmt);
         return Str2Date(df.format(new Date()));
     }
+
+    public static String ToGMT(Date date) {
+        DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.US);
+        df.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        return df.format(date) + " GMT";
+    }
+
+    public static Date FromGMT(String time_str) {
+        DateFormat df = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.US);
+        df.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        try {
+            return df.parse(time_str.replace("GMT", "").trim());
+        } catch (Exception ex) {
+            throw new BizLogicException("不合理的 GMT String: %s", time_str);
+        }
+    }
+
 
     public static Date Str2Date(String d) {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -482,6 +488,9 @@ public class Helper {
     }
 
     public static String ToJsonStringPretty(Object obj) {
+        if (obj == null) {
+            return null;
+        }
         JsonNode jsonNode = Json.toJson(obj);
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -791,12 +800,192 @@ public class Helper {
         return md;
     }
 
-    public static void SleepInMs(long millis) {
+    public static boolean HtmlToPdf(String html_content, String output_file_path) {
         try {
-            Thread.sleep(millis);
+            OutputStream os = new FileOutputStream(output_file_path);
+            ITextRenderer renderer = new ITextRenderer();
+            renderer.setDocumentFromString(html_content);
+
+            // 解决中文支持问题
+            ITextFontResolver fontResolver = renderer.getFontResolver();
+            String font_path = Play.application().getFile("/conf/resource/simsun.ttc").getAbsolutePath();
+            fontResolver.addFont(font_path, BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+            //解决图片的相对路径问题
+            String imgdir = Play.application().getFile("/conf/resource").toURI().toString();
+            renderer.getSharedContext().setBaseURL(imgdir);
+            renderer.layout();
+            renderer.createPDF(os);
+
+            os.flush();
+            os.close();
+            return true;
         } catch (Exception ex) {
-            return;
+            Logger.error(ex.getMessage());
+            return false;
         }
+    }
+
+    public static <A> void writeExcel(OutputStream out, List<A> records) throws IOException, WriteException, IllegalAccessException {
+        Class<?> clazz = records.get(0).getClass();
+        List<Pair<Field, String>> columns = Arrays.stream(clazz.getDeclaredFields())
+                .filter(field -> {
+                    Comment comment = field.getAnnotation(Comment.class);
+                    return comment != null;
+                }).map(field -> {
+                    Comment comment = field.getAnnotation(Comment.class);
+                    return Pair.of(field, comment.value());
+                }).collect(Collectors.toList());
+
+        WritableWorkbook workbook = Workbook.createWorkbook(out);
+        WritableSheet sheet = workbook.createSheet("Default", 0);
+
+        // 第一行写 Header
+        for (int i = 0; i < columns.size(); ++i) {
+            Label label = new Label(i, 0, columns.get(i).getRight());
+            sheet.addCell(label);
+        }
+
+        for (int i = 0; i < records.size(); ++i) {
+            int row = i + 1;
+            for (int j = 0; j < columns.size(); ++j) {
+                Object fieldValue = FieldUtils.readField(columns.get(j).getLeft(), records.get(i));
+
+                if (fieldValue == null) {
+                    Blank blankCell = new Blank(j, row);
+                    sheet.addCell(blankCell);
+                    continue;
+                }
+
+                if (ReflectUtil.isInstanceOf(fieldValue, JDateTime.class)) {
+                    JDateTime dateTime = (JDateTime) fieldValue;
+                    DateTime dateCell = new DateTime(j, row, dateTime.convertToDate());
+                    sheet.addCell(dateCell);
+                    continue;
+                }
+
+                if (ReflectUtil.isInstanceOf(fieldValue, Date.class)) {
+                    Date dateTime = (Date) fieldValue;
+                    DateTime dateCell = new DateTime(j, row, dateTime);
+                    sheet.addCell(dateCell);
+                    continue;
+                }
+
+                if (ReflectUtil.isInstanceOf(fieldValue, Double.class)) {
+                    Double val = (Double) fieldValue;
+                    Number numberCell = new Number(j, row, val);
+                    sheet.addCell(numberCell);
+                    continue;
+                }
+
+                if (ReflectUtil.isInstanceOf(fieldValue, Integer.class)) {
+                    Integer val = (Integer) fieldValue;
+                    Number numberCell = new Number(j, row, val);
+                    sheet.addCell(numberCell);
+                    continue;
+                }
+
+                if (ReflectUtil.isInstanceOf(fieldValue, Long.class)) {
+                    Long val = (Long) fieldValue;
+                    Number numberCell = new Number(j, row, val);
+                    sheet.addCell(numberCell);
+                    continue;
+                }
+
+                // 其他类型, 都转换成 String
+                Label labelCell = new Label(j, row, fieldValue.toString());
+                sheet.addCell(labelCell);
+            }
+        }
+        workbook.write();
+        workbook.close();
+    }
+
+    public static String Md5ToShortCode(String md5str) {
+//        String part1 = md5str.substring(0, 4);
+//        String part2 = md5str.substring(4, 8);
+//        String part3 = md5str.substring(8, 12);
+//        String part4 = md5str.substring(12, 16);
+//
+//        Logger.debug("{} {} {} {}", part1, part2, part3, part4);
+//
+//        long long1 = Long.parseUnsignedLong(part1, 16);
+//        long long2 = Long.parseUnsignedLong(part2, 16);
+//        long long3 = Long.parseUnsignedLong(part3, 16);
+//        long long4 = Long.parseUnsignedLong(part4, 16);
+//
+//        String scode1 = To62Radix(long1);
+//        String scode2 = To62Radix(long2);
+//        String scode3 = To62Radix(long3);
+//        String scode4 = To62Radix(long4);
+//
+//        Logger.debug("{} {} {} {}", long1, long2, long3, long4);
+//        Logger.debug("{} {} {} {}", scode1, scode2, scode3, scode4);
+
+        String part1 = md5str.substring(0, 8);
+        String part2 = md5str.substring(8, 16);
+
+        Logger.debug("{} {}", part1, part2);
+
+        long long1 = Long.parseUnsignedLong(part1, 16);
+        long long2 = Long.parseUnsignedLong(part2, 16);
+
+        Logger.debug("{} {}", long1, long2);
+
+        String scode1 = To62Radix(long1);
+        String scode2 = To62Radix(long2);
+
+
+        Logger.debug("{} {}", scode1, scode2);
+        return "";
+    }
+
+    private static char[] codes_62Radix = new char[62];
+
+    public static String To62Radix(long val) {
+
+        long v = val / 62;
+        int idx = (int)(val % 62);
+
+        if (v == 0) {
+            return CharUtils.toString(codes_62Radix[idx]);
+        } else {
+            return To62Radix(v) + CharUtils.toString(codes_62Radix[idx]);
+        }
+    }
+
+    public static long From62RadixStr(String vstr) {
+        if (StringUtils.isBlank(vstr) || !StringUtils.isAlphanumeric(vstr)) {
+            throw new BizLogicException("不合法的值,只允许字母和数字");
+        }
+        long result = 0;
+        for (int i = 0; i < vstr.length(); i++) {
+            char s = vstr.charAt(vstr.length() - 1 - i);
+            int codev = QueryCodes62Radix(s);
+            result = result + codev * (long)Math.pow(62, i);
+        }
+        return result;
+    }
+
+    private static int QueryCodes62Radix(char code) {
+        for (int i = 0; i < codes_62Radix.length; ++i) {
+            if (codes_62Radix[i] == code) {
+                return i;
+            }
+        }
+        throw new BizLogicException("必须是0-9a-zA-Z");
+    }
+
+    static {
+        for (int i = 0; i < 10; i++) {
+            codes_62Radix[i] = (char) ('0' + i);
+        }
+        for (int i = 10; i < 10 + 26; i++) {
+            codes_62Radix[i] = (char) ('a' + i - 10);
+        }
+        for (int i = 36; i < 36 + 26; i++) {
+            codes_62Radix[i] = (char) ('A' + i - 36);
+        }
+
     }
 
 }

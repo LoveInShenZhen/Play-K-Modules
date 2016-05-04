@@ -1,7 +1,7 @@
 package Wechat.PlanTasks;
 
 import K.BizLogic.SysConfBL;
-import Wechat.Serve.WeChatApi;
+import Wechat.WeChatApi;
 import com.fasterxml.jackson.databind.JsonNode;
 import jodd.datetime.JDateTime;
 import jodd.util.StringUtil;

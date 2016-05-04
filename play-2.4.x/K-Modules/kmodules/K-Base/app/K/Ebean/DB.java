@@ -14,6 +14,7 @@ import com.avaje.ebean.*;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import jodd.bean.BeanUtil;
+import jodd.datetime.JDateTime;
 import jodd.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import play.Play;
@@ -312,6 +313,10 @@ public class DB {
 
         if (type_name.equals(Date.class.getTypeName())) {
             return row.getUtilDate(field_name);
+        }
+
+        if (type_name.equals(JDateTime.class.getTypeName())) {
+            return new JDateTime(row.getUtilDate(field_name));
         }
 
         if (type_name.equals(java.sql.Date.class.getTypeName())) {

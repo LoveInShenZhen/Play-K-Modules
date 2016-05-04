@@ -106,7 +106,7 @@ public class UploadForm {
         String cfg = Configuration.root().getString("file_upload_dir", "");
         if (StringUtils.isBlank(cfg)) {
             // 如果没有指定, 则设定此目录为用户 Home 目录下创建的 /data/pnr-p2p/upload_file 目录
-            String user_home_dir = SystemUtil.getUserHome();
+            String user_home_dir = SystemUtil.userHome();
             upload_dir = FileNameUtil.concat(user_home_dir, "data/pnr-p2p/upload_file");
         } else {
             upload_dir = cfg;

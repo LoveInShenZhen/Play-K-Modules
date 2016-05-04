@@ -1,11 +1,16 @@
 package K.Init;
 
+import K.Common.JDateTimeJsonDeserializer;
+import K.Common.JDateTimeJsonSerializer;
 import K.EventBus.EventBusService;
 import K.Service.NotifyService;
 import K.Service.PlanTasks.PlanTaskService;
 import K.Service.ServiceMgr;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import jodd.datetime.JDateTime;
 import play.Configuration;
 import play.Logger;
+import play.libs.Json;
 
 
 /**
@@ -16,6 +21,8 @@ public class InitKBase {
 
     public static void OnStart() {
         Logger.debug("==>  InitKBase.OnStart() ...");
+
+        RegistJacksonModule();
 
         if (RunPlanTaskService()) {
 
@@ -38,6 +45,13 @@ public class InitKBase {
         ServiceMgr.Instance.StopAll();
     }
 
+    private static void RegistJacksonModule() {
+        SimpleModule module = new SimpleModule("CustomTypeModule");
+        module.addSerializer(JDateTime.class, new JDateTimeJsonSerializer());
+        module.addDeserializer(JDateTime.class, new JDateTimeJsonDeserializer());
+
+        Json.mapper().registerModule(module);
+    }
 
     private static boolean RunPlanTaskService() {
         return Configuration.root().getBoolean("K.PlanTaskService", false);
