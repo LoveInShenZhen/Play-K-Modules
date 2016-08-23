@@ -1,0 +1,54 @@
+# API 接口文档
+---
+
+<#list groups as group>
+
+## ${group.ToMarkdownStr(group.groupName)}
+---
+<#list group.apiInfoList as apiInfo>
+
+### ${apiInfo.method_name}
+* **功能描述**: ${apiInfo.ToMarkdownStr(apiInfo.method_comment)}
+* **API URL**: ${apiInfo.ToMarkdownStr(apiInfo.url)}
+* **HTTP Method**: ${apiInfo.http_method}
+
+* Query参数说明:
+
+<#list apiInfo.params as param>
+> * **${param.ToMarkdownStr(param.field_name)}** : ${param.field_type}, ${param.ToMarkdownStr(param.comments!)}
+</#list>
+
+<#if apiInfo.IsPostJsonApi() >
+* Post Json Data 样例:
+
+```
+${apiInfo.post_data_sample}
+```
+
+</#if>
+
+<#if apiInfo.IsPostFormApi()>
+* Post Form Fields:
+
+    <#list apiInfo.PostFormFieldInfos() as param>
+> * **${param.ToMarkdownStr(param.field_name)}** : ${param.field_type}, ${param.ToMarkdownStr(param.comments!)}
+    </#list>
+
+</#if>
+
+* 测试连接:
+> <a href="${apiInfo.TestPage()}" target="_blank">测试页面</a>
+
+* 返回结果样例:
+
+```
+${apiInfo.reply_info.sample}
+```
+
+* 返回结果重点字段说明:
+
+<#list apiInfo.reply_info.fields_with_comments as field>
+> * **${field.ToMarkdownStr(field.field_name)}** : ${field.field_type}, ${field.ToMarkdownStr(field.comments)}
+</#list>
+</#list>
+</#list>
