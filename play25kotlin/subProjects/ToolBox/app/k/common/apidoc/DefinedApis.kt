@@ -10,20 +10,17 @@ import javax.inject.Singleton
  */
 @Singleton
 class DefinedApis
-@Inject private constructor(private val routerProvider: Provider<Router>)  {
+@Inject
+private constructor(private val routerProvider: Provider<Router>) {
 
 
     fun AllRoutes(): List<RouteInfo> {
-        val routes : MutableList<RouteInfo> = mutableListOf()
-        this.routerProvider.get().documentation().forEach {
-            val routeInfo = RouteInfo(httpMethod=it.httpMethod,
+        return this.routerProvider.get().documentation().map {
+            RouteInfo(httpMethod = it.httpMethod,
                     url = it.pathPattern,
                     controllerPath = it.controllerMethodInvocation)
+        }.filter { it.GetJsonApiAnnotation() != null }
 
-            routes.add(routeInfo)
-        }
-
-        return routes
     }
 
 }

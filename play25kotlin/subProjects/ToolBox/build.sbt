@@ -29,9 +29,12 @@ libraryDependencies += "org.jodd" % "jodd-http" % "3.7"
 
 libraryDependencies += "org.jodd" % "jodd-mail" % "3.7"
 
-libraryDependencies += "org.simpleframework" % "simple-xml" % "2.7.+"
+libraryDependencies += "commons-io" % "commons-io" % "2.5"
 
-libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.+"
+libraryDependencies += "org.simpleframework" % "simple-xml" % "2.7.1"
 
-libraryDependencies += "com.fasterxml.jackson.module" % "jackson-module-kotlin" % "2.7.+"
+libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.39"
 
+libraryDependencies += "com.fasterxml.jackson.module" % "jackson-module-kotlin" % "2.7.7"
+
+libraryDependencies += "org.freemarker" % "freemarker" % "2.3.21"

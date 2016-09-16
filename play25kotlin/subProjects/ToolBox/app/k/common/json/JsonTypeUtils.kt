@@ -57,8 +57,7 @@ fun isNumber(kType: KType): Boolean {
             Long::class.java,
             Float::class.java,
             Double::class.java,
-            Number::class.java,
-            java.lang.Number::class.java)
+            Number::class.java)
 }
 
 fun isString(kType: KType): Boolean {
@@ -99,7 +98,6 @@ fun isBasicType(kClass: KClass<*>): Boolean {
             Float::class.java,
             Double::class.java,
             Number::class.java,
-            java.lang.Number::class.java,
             CharSequence::class.java,
             LocalDate::class.java,
             LocalDateTime::class.java,
@@ -114,7 +112,6 @@ fun isBasicType(kType: KType):Boolean{
     return isOneOfTypes(rawType,
             Int::class.java,
             Number::class.java,
-            java.lang.Number::class.java,
             CharSequence::class.java,
             LocalDate::class.java,
             LocalDateTime::class.java,
@@ -130,9 +127,9 @@ fun isContainerType(kClass: KClass<*>): Boolean {
     }
 
     return isOneOfTypes(kClass.javaObjectType,
-            java.util.List::class.java,
-            java.util.Map::class.java,
-            java.util.Set::class.java)
+            kotlin.collections.Map::class.java,
+            kotlin.collections.Set::class.java,
+            kotlin.collections.List::class.java)
 }
 
 fun isSimpleObject(kClass: KClass<*>): Boolean {
@@ -145,7 +142,7 @@ fun isSimpleObject(kClass: KClass<*>): Boolean {
 
 fun isMap(kType: KType): Boolean {
     val rawType = ReflectUtil.getRawType(kType.javaType)
-    return isOneOfTypes(rawType, java.util.Map::class.java)
+    return isOneOfTypes(rawType, kotlin.collections.Map::class.java)
 }
 
 fun mapKeyType(kType: KType): Class<*> {
@@ -160,7 +157,9 @@ fun mapValueType(kType: KType): Class<*> {
 
 fun isList(kType: KType): Boolean {
     val rawType = ReflectUtil.getRawType(kType.javaType)
-    return isOneOfTypes(rawType, java.util.List::class.java, java.util.Set::class.java)
+    return isOneOfTypes(rawType,
+            kotlin.collections.List::class.java,
+            kotlin.collections.Set::class.java)
 }
 
 fun isArray(kType: KType): Boolean {
@@ -169,7 +168,6 @@ fun isArray(kType: KType): Boolean {
 }
 
 fun listElementType(kType: KType): Class<*> {
-    val rawType = ReflectUtil.getRawType(kType.javaType)
     return ReflectUtil.getComponentType(kType.javaType, 0)
 }
 

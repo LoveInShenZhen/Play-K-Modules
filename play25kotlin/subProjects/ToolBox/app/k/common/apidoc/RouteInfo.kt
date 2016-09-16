@@ -4,6 +4,7 @@ package k.common.apidoc
 import jodd.util.ReflectUtil
 import k.aop.annotations.Comment
 import k.aop.annotations.JsonApi
+import k.common.Helper
 
 import java.lang.reflect.Method
 
@@ -13,17 +14,13 @@ import java.lang.reflect.Method
 class RouteInfo(
 
         @Comment("API http method: GET or POST")
-        private val httpMethod: String,
+        val httpMethod: String,
 
         @Comment("API url")
-        private val url: String,
+        val url: String,
 
         @Comment("控制器方法全路径")
-        private val controllerPath: String) {
-
-    fun ApiUrl(): String {
-        return url
-    }
+        val controllerPath: String) {
 
     fun ControllerClass(): Class<*> {
         return RouteInfo::class.java.classLoader.loadClass(this.ControllerClassName())
@@ -37,22 +34,21 @@ class RouteInfo(
     fun ControllerMethodName(): String {
         val l = controllerPath.lastIndexOf('.')
         val r = controllerPath.indexOf('(')
+        if (r == -1) {
+            // 说明没有 "(",
+            return controllerPath.split(".").last()
+        }
         return controllerPath.substring(l + 1, r)
     }
 
-    fun GetControllerMethod(): Method? {
+    fun GetControllerMethod(): Method {
         val methods = ReflectUtil.getAccessibleMethods(ControllerClass())
-        for (method in methods) {
-            if (method.name == ControllerMethodName()) {
-                return method
-            }
-        }
-
-        return null
+        val methodName = ControllerMethodName()
+        return methods.find { it.name == methodName }!!
     }
 
     fun GetJsonApiAnnotation(): JsonApi? {
-        val method = GetControllerMethod() ?: return null
+        val method = GetControllerMethod()
         val apiAnno = method.getAnnotation(JsonApi::class.java)
         return apiAnno
     }
@@ -66,5 +62,14 @@ class RouteInfo(
         }
     }
 
+    fun BuildApiInfo() : ApiInfo {
+        return ApiInfo(url = this.url,
+                httpMethod = this.httpMethod,
+                controllerClass = this.ControllerClassName(),
+                methodName = this.ControllerMethodName(),
+                replyKClass = this.GetJsonApiAnnotation()!!.ReplyClass,
+                postDataKClass = this.GetJsonApiAnnotation()!!.PostDataClass)
+
+    }
 
 }

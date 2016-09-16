@@ -3,6 +3,7 @@ package k.common.apidoc
 import k.aop.annotations.Comment
 import k.common.Helper
 import play.mvc.Controller
+import kotlin.reflect.KClass
 
 /**
  * Created by kk on 14/11/5.
@@ -21,30 +22,31 @@ constructor(
         @Comment("API 对应的 Controller 类下的方法名称")
         val methodName: String,
 
-        @Comment("返回Replay 对应的 java class name")
-        val replyClass: String) {
+        private val replyKClass: KClass<*>,
+
+        private val postDataKClass: KClass<*>) {
+
+    @Comment("返回Replay 对应的 java class name")
+    var replyClass: String = ""
 
     @Comment("POST 方法时, Form 表单 or JSON 对应的 类名称")
-    var postDataClass: String
+    var postDataClass: String = ""
 
     @Comment("POST 方法时, Form 表单 or JSON 对应的 Sample")
-    var postDataSample: String
+    var postDataSample: String = ""
 
     @Comment("API 描述")
-    var apiComment: String
+    var apiComment: String = ""
 
     @Comment("返回Replay的描述信息")
-    var replyInfo: FieldSchema?
+    var replyInfo: FieldSchema? = null
 
     @Comment("API 所有参数的描述")
-    var params: MutableList<FieldSchema>
+    var params: MutableList<FieldSchema> = mutableListOf<FieldSchema>()
 
     init {
-        postDataClass = ""
-        postDataSample = ""
-        apiComment = ""
-        replyInfo = null
-        params = mutableListOf<FieldSchema>()
+        replyClass = replyKClass.javaObjectType.name
+        postDataClass = postDataKClass?.javaObjectType.name ?: ""
         analyse()
     }
 
