@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import jodd.datetime.JDateTime
 import k.common.json.JDateTimeJsonDeserializer
 import k.common.json.JDateTimeJsonSerializer
+import k.task.PlanTaskService
 import play.Application
 import play.Configuration
 import play.cache.CacheApi
@@ -46,23 +47,16 @@ constructor(applicationLifecycle: ApplicationLifecycle,
         Helper.DLog(AnsiColor.GREEN, "KBase OnStart() ...")
         RegistJacksonModule()
 
-//        if (RunPlanTaskService()) {
-//            val service = PlanTaskService()
-//            ServiceMgr.Instance.RegService(service)
-//        }
-//
-//        val notifyService = NotifyService()
-//        ServiceMgr.Instance.RegService(notifyService)
-//
-//        val event_bus_srv = EventBusService.Singleton()
-//        ServiceMgr.Instance.RegService(event_bus_srv)
-//
-//        ServiceMgr.Instance.StartAll()
+        if (PlanTaskService.Enabled()) {
+            PlanTaskService.Start()
+        }
     }
 
     private fun OnStop() {
         Helper.DLog(AnsiColor.GREEN, "KBase OnStop() ...")
-//        ServiceMgr.Instance.StopAll()
+        if (PlanTaskService.Enabled()) {
+            PlanTaskService.Stop()
+        }
     }
 
     private fun RegistJacksonModule() {
@@ -71,9 +65,5 @@ constructor(applicationLifecycle: ApplicationLifecycle,
         module.addDeserializer(JDateTime::class.java, JDateTimeJsonDeserializer())
 
         Json.mapper().registerModule(module)
-    }
-
-    private fun RunPlanTaskService(): Boolean {
-        return Hub.configuration().getBoolean("K.PlanTaskService", false)!!
     }
 }

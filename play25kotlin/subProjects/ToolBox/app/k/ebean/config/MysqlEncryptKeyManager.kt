@@ -8,7 +8,7 @@ import k.common.Helper
 class MysqlEncryptKeyManager : EncryptKeyManager {
 
     init {
-        Helper.DLog(ansiColor= AnsiColor.BLACK, bgColor = AnsiColor.YELLOW_B, message = "Ebean Server load MysqlEncryptKeyManager")
+        Helper.DLog(ansiColor= AnsiColor.GREEN, message = "Ebean Server load MysqlEncryptKeyManager")
     }
 
     override fun getEncryptKey(tableName: String, columnName: String): EncryptKey {

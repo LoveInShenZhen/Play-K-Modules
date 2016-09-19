@@ -11,7 +11,7 @@ import k.ebean.config.MysqlEncryptKeyManager
  */
 class MyServerConfigStartup : ServerConfigStartup {
     override fun onStart(serverConfig: ServerConfig) {
-        Helper.DLog(ansiColor=AnsiColor.BLACK, bgColor = AnsiColor.YELLOW_B, message = "He, MyServerConfigStartup is called...")
+        Helper.DLog(ansiColor=AnsiColor.GREEN, message = "He, MyServerConfigStartup is called...")
         serverConfig.encryptKeyManager = MysqlEncryptKeyManager()
     }
 }
