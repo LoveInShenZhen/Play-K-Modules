@@ -43,7 +43,7 @@ constructor(applicationLifecycle: ApplicationLifecycle,
     }
 
     private fun OnStart() {
-        Helper.DLog("==> KBase OnStart() ...")
+        Helper.DLog(AnsiColor.GREEN, "KBase OnStart() ...")
         RegistJacksonModule()
 
 //        if (RunPlanTaskService()) {
@@ -61,7 +61,7 @@ constructor(applicationLifecycle: ApplicationLifecycle,
     }
 
     private fun OnStop() {
-        Helper.DLog("==> KBase OnStop() ...")
+        Helper.DLog(AnsiColor.GREEN, "KBase OnStop() ...")
 //        ServiceMgr.Instance.StopAll()
     }
 

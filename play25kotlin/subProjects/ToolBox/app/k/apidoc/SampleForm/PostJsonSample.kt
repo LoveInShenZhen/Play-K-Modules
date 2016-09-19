@@ -13,7 +13,7 @@ class PostJsonSample {
     @Comment("用户名")
     var name: String? = null
 
-    @Comment("交易记录")
+    @Comment("好友列表")
     var friends: List<String>
 
     init {
