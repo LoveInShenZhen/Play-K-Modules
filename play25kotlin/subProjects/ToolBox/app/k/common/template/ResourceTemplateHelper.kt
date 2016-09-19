@@ -12,16 +12,7 @@ object ResourceTemplateHelper {
 
     private val classConfMap = mutableMapOf<String, Configuration>()
 
-    fun JarPath(clazz: Class<*>):String {
-        try {
-            return clazz.protectionDomain.codeSource.location.path
-        } catch (ex:Exception) {
-            return ""
-        }
-    }
-
     fun FindConfigBy(clazz: Class<*>):Configuration {
-        val jarPath = JarPath(clazz)
         if (classConfMap.containsKey(clazz.typeName)) {
             return classConfMap[clazz.typeName]!!
         } else {

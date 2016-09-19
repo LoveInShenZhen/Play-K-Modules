@@ -58,14 +58,14 @@
                 <form id="ajax_form">
                     <#list params as api_param>
                         <div class="control-group param">
-                            <label class="control-label">${api_param.field_name}</label>
+                            <label class="control-label">${api_param.name}</label>
 
                             <div class="controls">
                                 <div class="pull-left">
-                                    <input type="text" id="${api_param.field_name}" name="${api_param.field_name}">
+                                    <input type="text" id="${api_param.name}" name="${api_param.name}">
                                 </div>
                                 <div class="pull-left" style="margin-left:10px;">
-                                    ${api_param.field_type!}, ${api_param.comments!}
+                                    ${api_param.type!}, ${api_param.desc!}
                                 </div>
                             </div>
 
@@ -83,7 +83,7 @@
                     <label class="control-label">返回结果：</label>
 
                     <div class="controls">
-                        <textarea id="response" style="min-height: 300px;min-width: 640px;"></textarea>
+                        <textarea id="response" style="min-height: 640px;min-width: 800px;"></textarea>
                     </div>
                 </div>
             </div>
@@ -102,14 +102,14 @@
                 <form id="ajax_form">
                     <#list params as api_param>
                         <div class="control-group param">
-                            <label class="control-label">${api_param.field_name}</label>
+                            <label class="control-label">${api_param.name}</label>
 
                             <div class="controls">
                                 <div class="pull-left">
-                                    <input type="text" id="${api_param.field_name}" name="${api_param.field_name}">
+                                    <input type="text" id="${api_param.name}" name="${api_param.name}">
                                 </div>
                                 <div class="pull-left" style="margin-left:10px;">
-                                    ${api_param.field_type!}, ${api_param.comments!}
+                                    ${api_param.type!}, ${api_param.desc!}
                                 </div>
                             </div>
 
@@ -135,7 +135,7 @@
                     <label class="control-label">返回结果：</label>
 
                     <div class="controls">
-                        <textarea id="postresponse" style="min-height: 300px;min-width: 640px;"></textarea>
+                        <textarea id="postresponse" style="min-height: 640px;min-width: 800px;"></textarea>
                     </div>
                 </div>
             </div>
@@ -154,14 +154,14 @@
                 <form id="ajax_form">
                     <#list params as api_param>
                         <div class="control-group param">
-                            <label class="control-label">${api_param.field_name}</label>
+                            <label class="control-label">${api_param.name}</label>
 
                             <div class="controls">
                                 <div class="pull-left">
-                                    <input type="text" id="${api_param.field_name}" name="${api_param.field_name}">
+                                    <input type="text" id="${api_param.name}" name="${api_param.name}">
                                 </div>
                                 <div class="pull-left" style="margin-left:10px;">
-                                    ${api_param.field_type!}, ${api_param.comments!}
+                                    ${api_param.type!}, ${api_param.desc!}
                                 </div>
                             </div>
 
@@ -178,14 +178,14 @@
                 <form id="post_form" method="POST" enctype="multipart/form-data">
                     <#list PostFormFieldInfos() as api_param>
                         <div class="control-group param">
-                            <label class="control-label">${api_param.field_name}</label>
+                            <label class="control-label">${api_param.name}</label>
 
                             <div class="controls">
                                 <div class="pull-left">
-                                    <input type="${api_param.input_type}" id="${api_param.field_name}" name="${api_param.field_name}">
+                                    <input type="${api_param.input_type}" id="${api_param.name}" name="${api_param.name}">
                                 </div>
                                 <div class="pull-left" style="margin-left:10px;">
-                                    ${api_param.field_type!}, ${api_param.comments!}
+                                    ${api_param.type!}, ${api_param.desc!}
                                 </div>
                             </div>
 
@@ -205,7 +205,7 @@
                     <label class="control-label">返回结果：</label>
 
                     <div class="controls">
-                        <textarea id="postresponse" style="min-height: 300px;min-width: 640px;"></textarea>
+                        <textarea id="postresponse" style="min-height: 640px;min-width: 800px;"></textarea>
                     </div>
                 </div>
             </div>

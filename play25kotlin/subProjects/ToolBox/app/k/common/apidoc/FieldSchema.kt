@@ -1,5 +1,6 @@
 package k.common.apidoc
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import k.aop.annotations.Comment
 import k.common.json.*
 import kotlin.reflect.KClass
@@ -12,6 +13,7 @@ import kotlin.reflect.memberProperties
 class FieldSchema {
 
     @Comment("在对象树里所处的层级")
+    @JsonIgnore
     var level = 1
 
     @Comment("方法参数或者返回结果 Reply 中的字段名称")
@@ -21,7 +23,7 @@ class FieldSchema {
     var desc: String = ""
 
     @Comment("字段的Json数据类型")
-    var jsonType: String = ""
+    var type: String = ""
 
     @Comment("包含的字段, key: 字段名(name)")
     var fields: MutableMap<String, FieldSchema>? = mutableMapOf()
@@ -34,7 +36,7 @@ class FieldSchema {
                 propSchema.level = ownnerSchema.level + 1
                 propSchema.name = it.name
                 propSchema.desc = propertyDesc(it.annotations)
-                propSchema.jsonType = jsonType(it.returnType).typeName
+                propSchema.type = jsonType(it.returnType).typeName
 
                 ownnerSchema.fields!!.put(propSchema.name, propSchema)
 
@@ -45,7 +47,7 @@ class FieldSchema {
                     elementSchema.level = propSchema.level + 1
                     elementSchema.name = "element"
                     elementSchema.desc = "Element of List (or Array)"
-                    elementSchema.jsonType = elementKClass.simpleName!!
+                    elementSchema.type = elementKClass.simpleName!!
 
                     propSchema.fields!!.put(elementSchema.name, elementSchema)
 
@@ -60,14 +62,14 @@ class FieldSchema {
                     keySchema.level = propSchema.level + 1
                     keySchema.name = "key"
                     keySchema.desc = "Key of Map"
-                    keySchema.jsonType = keyKClass.simpleName!!
+                    keySchema.type = keyKClass.simpleName!!
 
                     val valueKClass = mapValueType(it.returnType).kotlin
                     val valueSchema = FieldSchema()
                     valueSchema.level = propSchema.level + 1
                     valueSchema.name = "value"
                     valueSchema.desc = "Value of Map"
-                    valueSchema.jsonType = valueKClass.simpleName!!
+                    valueSchema.type = valueKClass.simpleName!!
 
                     propSchema.fields!!.put(keySchema.name, keySchema)
                     propSchema.fields!!.put(valueSchema.name, valueSchema)

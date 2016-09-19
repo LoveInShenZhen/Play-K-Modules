@@ -178,7 +178,7 @@ class JsonApiAction : Action<JsonApi>() {
 
     private fun handleApiException(ctx: Http.Context, ex: Exception) {
         // todo send email when has json exceptions
-
+        Logger.error("api url: ${ctx.toString()}\n${ExceptionUtil.exceptionChainToString(ex)}")
     }
 
 }

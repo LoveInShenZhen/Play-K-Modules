@@ -55,8 +55,8 @@ a:hover {
               <#list group.apiInfoList as apiInfo>
               <tr>
                 <td>${apiInfo.url}</td>
-                <td>${apiInfo.method_comment}</td>
-                <td><a href='${apiInfo.LocalTestPage()}' target="_blank">点击测试</a></td>
+                <td>${apiInfo.apiComment}</td>
+                <td><a href='${apiInfo.TestPage()}' target="_blank">点击测试</a></td>
               </tr>
               </#list>
             </tbody>

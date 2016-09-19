@@ -1,6 +1,7 @@
 package k.common.json
 
 import jodd.util.ReflectUtil
+import k.common.Helper
 import org.apache.commons.lang3.reflect.TypeUtils
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -17,7 +18,7 @@ import kotlin.reflect.jvm.javaType
 enum class JsonDataType(val typeName: String) {
     NUMBER("Number"),
     STRING("String"),
-    DATETIME("DateTime"),
+    DATETIME("DateTime String"),
     MAP("Map"),
     LIST("List"),
     OBJECT("Object")
@@ -27,8 +28,8 @@ fun jsonType(kType: KType): JsonDataType {
 
     return when {
         isNumber(kType) -> JsonDataType.NUMBER
-        isString(kType) -> JsonDataType.STRING
         isDateTime(kType) -> JsonDataType.DATETIME
+        isString(kType) -> JsonDataType.STRING
         isMap(kType) -> JsonDataType.MAP
         isList(kType) -> JsonDataType.LIST
         isArray(kType) -> JsonDataType.LIST
@@ -78,14 +79,15 @@ fun isString(kType: KType): Boolean {
 
 fun isDateTime(kType: KType): Boolean {
     val rawType = ReflectUtil.getRawType(kType.javaType)
-
+    Helper.DLog("KType: ${kType.toString()} rawType: ${rawType.name}")
     return isOneOfTypes(rawType,
             LocalDate::class.java,
             LocalDateTime::class.java,
             LocalTime::class.java,
             Date::class.java,
             java.sql.Date::class.java,
-            Calendar::class.java)
+            Calendar::class.java,
+            jodd.datetime.JDateTime::class.java)
 }
 
 fun isBasicType(kClass: KClass<*>): Boolean {

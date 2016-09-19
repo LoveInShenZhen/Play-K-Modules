@@ -10,6 +10,8 @@ import kotlin.reflect.KClass
 @With(k.aop.actions.JsonApiAction::class)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY, AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class JsonApi(val Transactional: Boolean = true, val UseEtag: Boolean = false, val ReplyClass : KClass<*>, val ApiMethodType:
-
-String = "GET", val PostDataClass : KClass<*> = PostFormSample::class)
+annotation class JsonApi(val Transactional: Boolean = true,
+                         val UseEtag: Boolean = false,
+                         val ReplyClass: KClass<*>,
+                         val ApiMethodType: String = "GET",
+                         val PostDataClass: KClass<*> = PostFormSample::class)

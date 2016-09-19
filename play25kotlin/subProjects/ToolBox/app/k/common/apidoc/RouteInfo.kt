@@ -41,14 +41,14 @@ class RouteInfo(
         return controllerPath.substring(l + 1, r)
     }
 
-    fun GetControllerMethod(): Method {
+    fun ControllerMethod(): Method {
         val methods = ReflectUtil.getAccessibleMethods(ControllerClass())
         val methodName = ControllerMethodName()
         return methods.find { it.name == methodName }!!
     }
 
-    fun GetJsonApiAnnotation(): JsonApi? {
-        val method = GetControllerMethod()
+    fun JsonApiAnnotation(): JsonApi? {
+        val method = ControllerMethod()
         val apiAnno = method.getAnnotation(JsonApi::class.java)
         return apiAnno
     }
@@ -64,11 +64,11 @@ class RouteInfo(
 
     fun BuildApiInfo() : ApiInfo {
         return ApiInfo(url = this.url,
-                httpMethod = this.httpMethod,
+                httpMethod = this.JsonApiAnnotation()!!.ApiMethodType,
                 controllerClass = this.ControllerClassName(),
                 methodName = this.ControllerMethodName(),
-                replyKClass = this.GetJsonApiAnnotation()!!.ReplyClass,
-                postDataKClass = this.GetJsonApiAnnotation()!!.PostDataClass)
+                replyKClass = this.JsonApiAnnotation()!!.ReplyClass,
+                postDataKClass = this.JsonApiAnnotation()!!.PostDataClass)
 
     }
 

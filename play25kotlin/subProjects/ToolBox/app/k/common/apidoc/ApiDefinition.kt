@@ -1,13 +1,16 @@
 package k.common.apidoc
 
 
+import k.aop.annotations.Comment
 import k.common.Helper
+import k.reply.ReplyBase
 
 /**
  * Created by kk on 15/1/12.
  */
-class ApiDefinition {
+class ApiDefinition : ReplyBase() {
 
+    @Comment("api 分组列表")
     var groups: MutableList<ApiGroup>
 
     init {
@@ -33,6 +36,11 @@ class ApiDefinition {
             names.add(group.groupName)
         }
         return names
+    }
+
+    fun AddApiInfo(apiInfo: ApiInfo) {
+        val group = this.GetApiGroupByName(apiInfo.groupName())
+        group.apiInfoList.add(apiInfo)
     }
 
     fun ToMarkdownStr(str: String): String {

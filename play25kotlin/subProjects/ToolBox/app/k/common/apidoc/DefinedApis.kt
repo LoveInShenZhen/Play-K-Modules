@@ -14,13 +14,20 @@ class DefinedApis
 private constructor(private val routerProvider: Provider<Router>) {
 
 
-    fun AllRoutes(): List<RouteInfo> {
+    fun ApiRoutes(): List<RouteInfo> {
         return this.routerProvider.get().documentation().map {
             RouteInfo(httpMethod = it.httpMethod,
                     url = it.pathPattern,
                     controllerPath = it.controllerMethodInvocation)
-        }.filter { it.GetJsonApiAnnotation() != null }
-
+        }.filter { it.JsonApiAnnotation() != null }
     }
 
+    fun JsonApis(): ApiDefinition {
+        val apis = ApiDefinition()
+        ApiRoutes().map { it.BuildApiInfo() }.forEach {
+            apis.AddApiInfo(it)
+        }
+
+        return apis
+    }
 }

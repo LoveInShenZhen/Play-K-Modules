@@ -1,9 +1,13 @@
 package k.common.apidoc
 
 import k.aop.annotations.Comment
+import k.aop.annotations.JsonApi
 import k.common.Helper
+import k.common.json.JsonDataType
 import play.mvc.Controller
 import kotlin.reflect.KClass
+import kotlin.reflect.functions
+import kotlin.reflect.jvm.javaType
 
 /**
  * Created by kk on 14/11/5.
@@ -22,9 +26,9 @@ constructor(
         @Comment("API 对应的 Controller 类下的方法名称")
         val methodName: String,
 
-        private val replyKClass: KClass<*>,
+        replyKClass: KClass<*>,
 
-        private val postDataKClass: KClass<*>) {
+        postDataKClass: KClass<*>) {
 
     @Comment("返回Replay 对应的 java class name")
     var replyClass: String = ""
@@ -32,26 +36,44 @@ constructor(
     @Comment("POST 方法时, Form 表单 or JSON 对应的 类名称")
     var postDataClass: String = ""
 
-    @Comment("POST 方法时, Form 表单 or JSON 对应的 Sample")
-    var postDataSample: String = ""
+//    @Comment("POST 方法时, Form 表单 or JSON 对应的 Sample")
+//    var postDataSample: String = ""
 
     @Comment("API 描述")
     var apiComment: String = ""
 
     @Comment("返回Replay的描述信息")
-    var replyInfo: FieldSchema? = null
+    var replyInfo: FieldSchema
 
     @Comment("API 所有参数的描述")
-    var params: MutableList<FieldSchema> = mutableListOf<FieldSchema>()
+    var params: List<ParameterInfo> = emptyList()
 
     init {
         replyClass = replyKClass.javaObjectType.name
-        postDataClass = postDataKClass?.javaObjectType.name ?: ""
+        postDataClass = postDataKClass.javaObjectType.name
+
+
+        if (httpMethod == ApiInfo.Get) {
+            postDataClass = ""
+        }
+
+        replyInfo = FieldSchema()
+        replyInfo.level = 0
+        replyInfo.name = "reply"
+        replyInfo.desc = ""
+        replyInfo.type = JsonDataType.OBJECT.typeName
+
         analyse()
     }
 
     fun ToMarkdownStr(str: String): String {
         return Helper.EscapeMarkdown(str)
+    }
+
+    fun groupName(): String {
+        val controllerClazz = Class.forName(this.controllerClass)
+        val anno = controllerClazz.getAnnotation(Comment::class.java)
+        return anno?.value ?: this.controllerClass
     }
 
     private fun analyse() {
@@ -63,43 +85,59 @@ constructor(
 
     private fun analyseMethod() {
         // 分析 controller 方法信息
+        val controllerKClazz = Class.forName(this.controllerClass).kotlin
+        val method = controllerKClazz.functions.find { it.name == this.methodName }
+        val commentAnno = method!!.annotations.find { it is Comment }
+        if (commentAnno != null && commentAnno is Comment) {
+            this.apiComment = commentAnno.value
+        }
+
+        this.params = method.parameters
+                .filter { it.name != null }
+                .map {
+                    var paramDesc = ""
+                    val paramComment = it.annotations.find { it is Comment }
+                    if (paramComment != null && paramComment is Comment) {
+                        paramDesc = paramComment.value
+                    }
+                    ParameterInfo(name = it.name!!,
+                            desc = paramDesc,
+                            type = it.type.javaType.typeName.split(".").last())
+                }
+
+        val jsonApiAnno = method.annotations.find { it is JsonApi } as JsonApi
+
+        if (postDataClass.isNotBlank()) {
+            if (jsonApiAnno.ApiMethodType == ApiInfo.PostForm) {
+                // todo 构造 form 表单
+            }
+
+            if (jsonApiAnno.ApiMethodType == ApiInfo.PostJson) {
+                // todo 构造 post 的 JSON 字符串
+            }
+        }
+
     }
 
     private fun analyseReply() {
         // 分析返回的 reply 的信息
-//        val reply_clazz = Helper.LoadClass(this.reply_class)
-//        val reply = reply_clazz!!.newInstance() as ReplyBase
-//        replyInfo = ReplyInfo()
-//        replyInfo.reply_class_name = this.reply_class
-//        reply.SetupSampleData()
-//        replyInfo.sample = Helper.ToJsonStringPretty(reply)
-//
-//        DocUtils.FindFieldWithComments(Helper.LoadClass(this.reply_class)!!,
-//                replyInfo.fields_with_comments)
+        FieldSchema.resolveFields(Class.forName(this.replyClass).kotlin, replyInfo)
     }
 
     fun TestPage(): String {
-        return String.format("http://%s/api/doc/GeneratApiSample?api_url=%s",
-                Controller.request().host(),
-                this.url)
-    }
-
-    fun LocalTestPage(): String {
-        return String.format("http://%s/api/doc/GeneratApiSample?api_url=%s",
-                Controller.request().host(),
-                this.url)
+        return "http://${Controller.request().host()}/apiSample?apiUrl=${this.url}"
     }
 
     fun IsGetJsonApi(): Boolean {
-        return this.httpMethod.equals("GET", ignoreCase = true)
+        return this.httpMethod.equals(ApiInfo.Get, ignoreCase = true)
     }
 
     fun IsPostJsonApi(): Boolean {
-        return this.httpMethod.equals("POST JSON", ignoreCase = true)
+        return this.httpMethod.equals(ApiInfo.PostJson, ignoreCase = true)
     }
 
     fun IsPostFormApi(): Boolean {
-        return this.httpMethod.equals("POST FORM", ignoreCase = true)
+        return this.httpMethod.equals(ApiInfo.PostForm, ignoreCase = true)
     }
 
     fun PostFormFieldInfos(): MutableList<FieldSchema> {
