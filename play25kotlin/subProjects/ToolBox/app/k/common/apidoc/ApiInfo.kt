@@ -8,6 +8,8 @@ import play.mvc.Controller
 import kotlin.reflect.KClass
 import kotlin.reflect.functions
 import kotlin.reflect.jvm.javaType
+import kotlin.reflect.memberFunctions
+import kotlin.reflect.memberProperties
 
 /**
  * Created by kk on 14/11/5.
@@ -36,14 +38,17 @@ constructor(
     @Comment("POST 方法时, Form 表单 or JSON 对应的 类名称")
     var postDataClass: String = ""
 
-//    @Comment("POST 方法时, Form 表单 or JSON 对应的 Sample")
-//    var postDataSample: String = ""
+    @Comment("POST 方法时, Form 表单 or JSON 对应的 Sample")
+    var postDataSample: String = ""
 
     @Comment("API 描述")
     var apiComment: String = ""
 
     @Comment("返回Replay的描述信息")
     var replyInfo: FieldSchema
+
+    @Comment("返回结果样例")
+    var replySampleData: String = ""
 
     @Comment("API 所有参数的描述")
     var params: List<ParameterInfo> = emptyList()
@@ -62,6 +67,9 @@ constructor(
         replyInfo.name = "reply"
         replyInfo.desc = ""
         replyInfo.type = JsonDataType.OBJECT.typeName
+
+        postDataSample = SampleJsonData(postDataKClass)
+        replySampleData = SampleJsonData(replyKClass)
 
         analyse()
     }
@@ -140,44 +148,21 @@ constructor(
         return this.httpMethod.equals(ApiInfo.PostForm, ignoreCase = true)
     }
 
-    fun PostFormFieldInfos(): MutableList<FieldSchema> {
-//        val fieldInfoList = kotlin.collections.MutableList<FieldInfo>()
-//        if (IsPostFormApi()) {
-//            val form_class = Helper.LoadClass(this.postDataClass)
-//            val form_fields = ReflectUtil.getAccessibleFields(form_class!!)
-//            for (field in form_fields) {
-//                if (Modifier.isStatic(field.modifiers)) {
-//                    // 过滤掉 static field
-//                    continue
-//                }
-//                val fieldInfo = FieldInfo()
-//                fieldInfo.field_name = field.name
-//                fieldInfo.field_type = field.type.simpleName
-//
-//                val comment = field.getAnnotation(Comment::class.java)
-//                if (comment != null) {
-//                    fieldInfo.comments = comment.value
-//                } else {
-//                    fieldInfo.comments = ""
-//                }
-//
-//                fieldInfoList.add(fieldInfo)
-//            }
-//            //            if (this.postDataClass.equals(UploadForm.class.getName())) {
-//            //                FieldInfo fieldInfo = new FieldInfo();
-//            //                fieldInfo.field_name = "attachmentFile";
-//            //                fieldInfo.field_type = "FilePart";
-//            //                fieldInfo.comments = "上次文件";
-//            //                fieldInfo.input_type = "file";
-//            //
-//            //                fieldInfoList.add(fieldInfo);
-//            //            }
-//        }
-//        return fieldInfoList
-
-        val fieldInfoList = mutableListOf<FieldSchema>()
-
-        return fieldInfoList
+    fun PostFormFieldInfos(): List<ParameterInfo> {
+        if (this.IsPostFormApi()) {
+            return Class.forName(this.postDataClass).kotlin.memberProperties.map {
+                var paramDesc = ""
+                val paramComment = it.annotations.find { it is Comment }
+                if (paramComment != null && paramComment is Comment) {
+                    paramDesc = paramComment.value
+                }
+                ParameterInfo(name = it.name,
+                        desc = paramDesc,
+                        type = it.returnType.javaType.typeName.split(".").last())
+            }
+        } else {
+            return emptyList()
+        }
     }
 
     companion object {
@@ -185,5 +170,19 @@ constructor(
         val PostJson = "POST JSON"
         val PostForm = "POST FORM"
         val Get = "GET"
+
+        fun SampleJsonData(kClass: KClass<*>): String {
+            val sampleDataFunc = kClass.memberFunctions.find { it.name == "SampleData" } ?: return "请在 ${kClass.qualifiedName} 实现 fun SampleData(): String"
+            if (sampleDataFunc.parameters.size != 1) {
+                return "请在 ${kClass.qualifiedName} 实现 fun SampleData(): String"
+            }
+            val sampleObj = kClass.java.newInstance()
+            if (sampleObj != null) {
+                sampleDataFunc.call(sampleObj)
+                return Helper.ToJsonStringPretty(sampleObj)
+            } else {
+                return "${kClass.qualifiedName} 需要提供无参数的构造函数"
+            }
+        }
     }
 }

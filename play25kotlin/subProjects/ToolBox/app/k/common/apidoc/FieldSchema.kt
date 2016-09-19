@@ -2,6 +2,7 @@ package k.common.apidoc
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import k.aop.annotations.Comment
+import k.common.Helper
 import k.common.json.*
 import kotlin.reflect.KClass
 import kotlin.reflect.memberProperties
@@ -27,6 +28,10 @@ class FieldSchema {
 
     @Comment("包含的字段, key: 字段名(name)")
     var fields: MutableMap<String, FieldSchema>? = mutableMapOf()
+
+    fun JsonSchema():String {
+        return Helper.ToJsonStringPretty(this)
+    }
 
     companion object {
         fun resolveFields(ownnerClass: KClass<*>, ownnerSchema: FieldSchema) {

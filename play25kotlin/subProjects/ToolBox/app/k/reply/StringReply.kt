@@ -11,5 +11,10 @@ class StringReply : ReplyBase() {
 
     @Comment("文本内容")
     var result: String? = null
+
+    override fun SampleData() {
+        super.SampleData()
+        this.result = "返回的文本内容"
+    }
 }
 

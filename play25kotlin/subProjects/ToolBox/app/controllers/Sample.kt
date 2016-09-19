@@ -3,9 +3,9 @@ package controllers
 
 import k.aop.annotations.Comment
 import k.aop.annotations.JsonApi
+import k.common.Helper
+import k.common.apidoc.ApiInfo
 import k.common.apidoc.DefinedApis
-import k.common.apidoc.FieldSchema
-import k.common.json.JsonDataType
 import k.controllers.JsonpController
 import k.reply.StringReply
 import k.reply.sample.SampleReply
@@ -26,12 +26,7 @@ constructor(var definedApis: DefinedApis) : JsonpController() {
     @JsonApi(ReplyClass = SampleReply::class)
     fun kktest() : Result {
         val reply = SampleReply()
-        val replySchema = FieldSchema()
-        replySchema.name = "root"
-        replySchema.desc = "对象根节点"
-        replySchema.type = JsonDataType.OBJECT.typeName
-
-        FieldSchema.resolveFields(SampleReply::class, replySchema)
+        Helper.DLog("\n" + ApiInfo.SampleJsonData(StringReply::class))
 
         return ok(reply)
     }

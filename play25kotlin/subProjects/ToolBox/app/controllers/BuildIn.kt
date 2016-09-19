@@ -39,4 +39,11 @@ constructor(var definedApis: DefinedApis) : JsonpController() {
         return ok(html).`as`("text/html; charset=UTF-8")
     }
 
+    fun ApiMarkdown(): Result {
+        val apiDef = definedApis.JsonApis()
+        val md = ResourceTemplateHelper.Process(DefinedApis::class.java, "/ApiDocTemplates/ApiDoc", apiDef)
+
+        return ok(md).`as`("text/plain; charset=UTF-8")
+    }
+
 }

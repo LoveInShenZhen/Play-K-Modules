@@ -79,7 +79,6 @@ fun isString(kType: KType): Boolean {
 
 fun isDateTime(kType: KType): Boolean {
     val rawType = ReflectUtil.getRawType(kType.javaType)
-    Helper.DLog("KType: ${kType.toString()} rawType: ${rawType.name}")
     return isOneOfTypes(rawType,
             LocalDate::class.java,
             LocalDateTime::class.java,
