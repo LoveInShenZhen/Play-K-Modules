@@ -8,8 +8,10 @@ import k.common.StringChecker
 import k.common.apidoc.ApiInfo
 import k.common.apidoc.DefinedApis
 import k.controllers.JsonpController
+import k.reply.ReplyBase
 import k.reply.StringReply
 import k.reply.sample.SampleReply
+import k.task.SampleTask
 import play.mvc.Result
 import javax.inject.Inject
 
@@ -39,6 +41,13 @@ constructor(var definedApis: DefinedApis) : JsonpController() {
         val msg = StringChecker.IDCardValidate(idcard)
         reply.result = if (msg.isBlank()) "有效的身份证号码" else msg
         return ok(reply)
+    }
+
+    @Comment("向 PlanTask 里增加一个测试 sample 任务")
+    @JsonApi
+    fun AddSampleTask():Result {
+        SampleTask.addTask()
+        return ok(ReplyBase())
     }
 
 }
