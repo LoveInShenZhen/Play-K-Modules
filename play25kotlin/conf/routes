@@ -10,7 +10,7 @@ GET     /count                      controllers.CountController.count
 GET     /message                    controllers.AsyncController.message
 
 GET     /test                       controllers.Sample.kktest()
-GET     /test2                      controllers.Sample.kktest2(msg)
+GET     /CheckIdCard                controllers.Sample.CheckIdCard(idcard)
 
 GET     /apis                       controllers.BuildIn.Apis
 GET     /apiIndex                   controllers.BuildIn.ApiIndex

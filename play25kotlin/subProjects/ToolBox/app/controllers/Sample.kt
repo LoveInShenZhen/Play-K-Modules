@@ -4,6 +4,7 @@ package controllers
 import k.aop.annotations.Comment
 import k.aop.annotations.JsonApi
 import k.common.Helper
+import k.common.StringChecker
 import k.common.apidoc.ApiInfo
 import k.common.apidoc.DefinedApis
 import k.controllers.JsonpController
@@ -31,11 +32,12 @@ constructor(var definedApis: DefinedApis) : JsonpController() {
         return ok(reply)
     }
 
-    @Comment("测试方法2")
+    @Comment("验证身份证号码")
     @JsonApi(ReplyClass = StringReply::class)
-    fun kktest2(msg: String) : Result {
+    fun CheckIdCard(idcard: String) : Result {
         val reply = StringReply()
-        reply.result = "Received: $msg"
+        val msg = StringChecker.IDCardValidate(idcard)
+        reply.result = if (msg.isBlank()) "有效的身份证号码" else msg
         return ok(reply)
     }
 
